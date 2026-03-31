@@ -109,63 +109,180 @@ $amountInWords = numberToWordsIndian($netPayable);
 <style>
     .invoice-wrapper{
         background:#fff;
-        padding:30px;
+        padding:16px;
         border:1px solid #000;
-        max-width:1000px;
+        max-width:900px;
         margin:auto;
     }
+
     .invoice-title{
         text-align:center;
-        font-size:28px;
+        font-size:22px;
         font-weight:700;
-        margin-bottom:20px;
+        margin-bottom:12px;
         text-transform:uppercase;
+        line-height:1.2;
     }
+
     .invoice-meta{
         display:flex;
         justify-content:space-between;
-        font-size:14px;
-        margin-bottom:15px;
+        gap:10px;
+        font-size:12px;
+        margin-bottom:10px;
+        line-height:1.3;
     }
+
     .party-table,
     .item-table,
     .summary-table{
         width:100%;
         border-collapse:collapse;
-        margin-bottom:15px;
+        margin-bottom:10px;
     }
+
     .party-table td,
     .item-table th,
     .item-table td,
     .summary-table td{
         border:1px solid #000;
-        padding:8px;
+        padding:6px;
         vertical-align:top;
-        font-size:14px;
+        font-size:12px;
+        line-height:1.3;
     }
+
     .item-table th{
         background:#f2f2f2;
         text-align:center;
+        font-weight:700;
     }
-    .bold{ font-weight:700; }
-    .right{ text-align:right; }
-    .center{ text-align:center; }
-    .signature-section{
-        margin-top:50px;
+
+    .bold{
+        font-weight:700;
+    }
+
+    .right{
         text-align:right;
     }
+
+    .center{
+        text-align:center;
+    }
+
+    .signature-section{
+        margin-top:22px;
+        text-align:right;
+    }
+
     .company-name{
         font-weight:700;
-        font-size:18px;
+        font-size:15px;
+        line-height:1.25;
     }
+
     .small-text{
-        font-size:13px;
-        line-height:1.6;
+        font-size:11px;
+        line-height:1.35;
     }
+
+    .card{
+        border:none;
+        box-shadow:none;
+    }
+
+    @page{
+        size:A4 portrait;
+        margin:8mm;
+    }
+
     @media print {
-        .no-print{ display:none !important; }
-        body{ background:#fff !important; }
-        .card{ border:none !important; box-shadow:none !important; }
+        html, body{
+            width:210mm;
+            height:297mm;
+            background:#fff !important;
+            -webkit-print-color-adjust:exact;
+            print-color-adjust:exact;
+        }
+
+        .no-print{
+            display:none !important;
+        }
+
+        .card,
+        .card-body{
+            border:none !important;
+            box-shadow:none !important;
+            padding:0 !important;
+            margin:0 !important;
+        }
+
+        .container{
+            width:100% !important;
+            max-width:100% !important;
+            padding:0 !important;
+            margin:0 !important;
+        }
+
+        .invoice-wrapper{
+            border:none !important;
+            padding:0 !important;
+            max-width:100% !important;
+            margin:0 !important;
+        }
+
+        .invoice-title{
+            font-size:18px !important;
+            margin-bottom:8px !important;
+        }
+
+        .invoice-meta{
+            font-size:11px !important;
+            margin-bottom:8px !important;
+        }
+
+        .party-table,
+        .item-table,
+        .summary-table{
+            margin-bottom:8px !important;
+            page-break-inside:avoid !important;
+        }
+
+        .party-table td,
+        .item-table th,
+        .item-table td,
+        .summary-table td{
+            font-size:10.5px !important;
+            padding:4px !important;
+            line-height:1.2 !important;
+        }
+
+        .company-name{
+            font-size:13px !important;
+        }
+
+        .small-text{
+            font-size:10px !important;
+            line-height:1.2 !important;
+        }
+
+        .signature-section{
+            margin-top:14px !important;
+            page-break-inside:avoid !important;
+        }
+
+        .mb-2,
+        .mb-3,
+        .mb-4,
+        .mb-5,
+        .mt-4{
+            margin-top:6px !important;
+            margin-bottom:6px !important;
+        }
+
+        br{
+            line-height:1.1 !important;
+        }
     }
 </style>
 
