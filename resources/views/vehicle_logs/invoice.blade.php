@@ -102,7 +102,7 @@ function convertTwoDigit($number, $words)
 }
 $invoiceNo = 'PE-' . $vehicle_log->from_date->format('Y-m') . '-' . str_pad($vehicle_log->id, 4, '0', STR_PAD_LEFT);
 
-$invoiceDate = now()->format('d-m-Y');
+$invoiceDate = $vehicle_log->to_date->copy()->addDay()->format('d-m-Y');
 $amountInWords = numberToWordsIndian($netPayable);
 @endphp
 
