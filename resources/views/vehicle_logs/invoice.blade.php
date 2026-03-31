@@ -101,7 +101,7 @@ function convertTwoDigit($number, $words)
     return trim($words[$tens] . ' ' . $words[$unit]);
 }
 $invoiceNo = 'PE-' . $vehicle_log->from_date->format('Y-m') . '-' . str_pad($vehicle_log->id, 4, '0', STR_PAD_LEFT);
-<!-- $invoiceNo = 'VPS-' . str_pad($vehicle_log->id, 4, '0', STR_PAD_LEFT); -->
+
 $invoiceDate = now()->format('d-m-Y');
 $amountInWords = numberToWordsIndian($netPayable);
 @endphp
