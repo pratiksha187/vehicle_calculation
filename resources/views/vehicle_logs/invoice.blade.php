@@ -39,39 +39,32 @@ function numberToWordsIndian($number)
         90 => 'Ninety'
     ];
 
-    $digits = ['', 'Hundred', 'Thousand', 'Lakh', 'Crore'];
-
     $str = [];
 
-    // Crore
     if ($no >= 10000000) {
         $crore = floor($no / 10000000);
         $str[] = convertTwoDigit($crore, $words) . ' Crore';
         $no = $no % 10000000;
     }
 
-    // Lakh
     if ($no >= 100000) {
         $lakh = floor($no / 100000);
         $str[] = convertTwoDigit($lakh, $words) . ' Lakh';
         $no = $no % 100000;
     }
 
-    // Thousand
     if ($no >= 1000) {
         $thousand = floor($no / 1000);
         $str[] = convertTwoDigit($thousand, $words) . ' Thousand';
         $no = $no % 1000;
     }
 
-    // Hundred
     if ($no >= 100) {
         $hundred = floor($no / 100);
         $str[] = $words[$hundred] . ' Hundred';
         $no = $no % 100;
     }
 
-    // Last two digits
     if ($no > 0) {
         if (!empty($str)) {
             $str[] = 'and ' . convertTwoDigit($no, $words);
@@ -100,9 +93,14 @@ function convertTwoDigit($number, $words)
 
     return trim($words[$tens] . ' ' . $words[$unit]);
 }
+
 $invoiceNo = 'PE-' . $vehicle_log->from_date->format('Y-m') . '-' . str_pad($vehicle_log->id, 4, '0', STR_PAD_LEFT);
 $invoiceDate = $vehicle_log->to_date->copy()->endOfMonth()->format('d-m-Y');
-$amountInWords = numberToWordsIndian($netPayable);
+
+$roundedNetPayable = round($netPayable);
+$roundOffAmount = $roundedNetPayable - $netPayable;
+
+$amountInWords = numberToWordsIndian($roundedNetPayable);
 @endphp
 
 <style>
@@ -157,17 +155,9 @@ $amountInWords = numberToWordsIndian($netPayable);
         font-weight:700;
     }
 
-    .bold{
-        font-weight:700;
-    }
-
-    .right{
-        text-align:right;
-    }
-
-    .center{
-        text-align:center;
-    }
+    .bold{ font-weight:700; }
+    .right{ text-align:right; }
+    .center{ text-align:center; }
 
     .signature-section{
         margin-top:22px;
@@ -289,7 +279,7 @@ $amountInWords = numberToWordsIndian($netPayable);
     <h3>Tax Invoice</h3>
     <div>
         <a href="{{ route('vehicle-logs.index') }}" class="btn btn-secondary">Back</a>
-        <button onclick="window.print()" class="btn btn-dark">Print Invoice</button>
+        <button onclick="window.print()" class="btn btn-dark no-print">Print Invoice</button>
     </div>
 </div>
 
@@ -323,7 +313,7 @@ $amountInWords = numberToWordsIndian($netPayable);
                             Address: Nimbode,khalapur<br>
                             Contact: +91 9309886247<br>
                             Email: priyanshenterprise28@gmail.com<br>
-                            GSTIN: 
+                            GSTIN:
                         </div>
                     </td>
                 </tr>
@@ -337,7 +327,7 @@ $amountInWords = numberToWordsIndian($netPayable);
                         <th width="6%">Sr</th>
                         <th>Description</th>
                         <th width="16%">Amount</th>
-                        <th width="14%"> TDS (%)</th>
+                        <th width="14%">TDS (%)</th>
                         <th width="16%">TDS Amount</th>
                         <th width="16%">Net Total</th>
                     </tr>
@@ -360,7 +350,7 @@ $amountInWords = numberToWordsIndian($netPayable);
                         <td class="right">₹ {{ number_format($subtotal, 2) }}</td>
                         <td class="center">{{ $tdsPercent }}%</td>
                         <td class="right">₹ {{ number_format($tdsAmount, 2) }}</td>
-                        <td class="right">₹ {{ number_format($netPayable, 2) }}</td>
+                        <td class="right">₹ {{ number_format($roundedNetPayable, 2) }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -375,8 +365,18 @@ $amountInWords = numberToWordsIndian($netPayable);
                     <td class="right">₹ {{ number_format($tdsAmount, 2) }}</td>
                 </tr>
                 <tr>
-                    <td class="right"><strong>Total:</strong></td>
-                    <td class="right"><strong>₹ {{ number_format($netPayable, 2) }}</strong></td>
+                    <td class="right"><strong>Net Amount:</strong></td>
+                    <td class="right">₹ {{ number_format($netPayable, 2) }}</td>
+                </tr>
+                <!-- <tr>
+                    <td class="right"><strong>Round Off:</strong></td>
+                    <td class="right">
+                        {{ $roundOffAmount >= 0 ? '+' : '-' }} ₹ {{ number_format(abs($roundOffAmount), 2) }}
+                    </td>
+                </tr> -->
+                <tr>
+                    <td class="right"><strong>Grand Total:</strong></td>
+                    <td class="right"><strong>₹ {{ number_format($roundedNetPayable, 2) }}</strong></td>
                 </tr>
             </table>
 
@@ -385,9 +385,8 @@ $amountInWords = numberToWordsIndian($netPayable);
             </div>
 
             <div class="signature-section">
-               
                 <div class="bold">Pratiksha Nikesh Misal</div>
-                 <div class="small-text mb-5">Authorised Signatory</div>
+                <div class="small-text mb-5">Authorised Signatory</div>
             </div>
         </div>
     </div>
