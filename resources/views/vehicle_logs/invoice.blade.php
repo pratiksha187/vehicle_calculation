@@ -297,7 +297,7 @@ $amountInWords = numberToWordsIndian($netPayable);
 <div class="card">
     <div class="card-body">
         <div class="invoice-wrapper">
-            <div class="invoice-title">Tax Invoice</div>
+            <div class="invoice-title">Invoice</div>
 
             <div class="invoice-meta">
                 <div><span class="bold">Invoice No:</span> {{ $invoiceNo }}</div>
@@ -338,7 +338,7 @@ $amountInWords = numberToWordsIndian($netPayable);
                         <th width="6%">Sr</th>
                         <th>Description</th>
                         <th width="16%">Amount</th>
-                        <th width="14%">TDS (%)</th>
+                        <th width="14%"> TDS (%)</th>
                         <th width="16%">TDS Amount</th>
                         <th width="16%">Net Total</th>
                     </tr>
@@ -347,7 +347,7 @@ $amountInWords = numberToWordsIndian($netPayable);
                     <tr>
                         <td class="center">1</td>
                         <td>
-                            Vehicle monthly billing charges for
+                            Vehicle monthly billing charges for CAMPER -
                             <strong>{{ $vehicle_log->vehicle->vehicle_name }} - {{ $vehicle_log->vehicle->vehicle_number }}</strong>
                             for the period
                             <strong>{{ $vehicle_log->from_date->format('d-m-Y') }} to {{ $vehicle_log->to_date->format('d-m-Y') }}</strong>.
@@ -372,7 +372,7 @@ $amountInWords = numberToWordsIndian($netPayable);
                     <td class="right" width="16%">₹ {{ number_format($subtotal, 2) }}</td>
                 </tr>
                 <tr>
-                    <td class="right"><strong>TDS ({{ $tdsPercent }}%):</strong></td>
+                    <td class="right"><strong>Less TDS ({{ $tdsPercent }}%):</strong></td>
                     <td class="right">₹ {{ number_format($tdsAmount, 2) }}</td>
                 </tr>
                 <tr>
