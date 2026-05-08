@@ -105,6 +105,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
 
     $subtotal = $vehicle_log->total_billing_amount;
     $tdsPercent = $vehicle_log->tds_percent;
+    dd($tdsPercent);
     $tdsAmount = $vehicle_log->tds_amount;
     $netPayable = $vehicle_log->net_payable;
 
