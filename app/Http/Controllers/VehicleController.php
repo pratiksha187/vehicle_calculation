@@ -20,16 +20,18 @@ class VehicleController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'vehicle_name' => 'required|string|max:255',
             'vehicle_number' => 'required|string|max:255|unique:vehicles,vehicle_number',
             'owner_name' => 'nullable|string|max:255',
             'fixed_monthly_amount' => 'required|numeric|min:0',
+            'km_limit' => 'required|integer|min:0',
+            'extra_km_rate' => 'required|numeric|min:0',
             'ot_rate_per_hour' => 'required|numeric|min:0',
             'tds_percent' => 'required|numeric|min:0',
         ]);
 
-        Vehicle::create($request->all());
+        Vehicle::create($validated);
 
         return redirect()->route('vehicles.index')->with('success', 'Vehicle created successfully.');
     }
@@ -41,16 +43,18 @@ class VehicleController extends Controller
 
     public function update(Request $request, Vehicle $vehicle)
     {
-        $request->validate([
+        $validated = $request->validate([
             'vehicle_name' => 'required|string|max:255',
             'vehicle_number' => 'required|string|max:255|unique:vehicles,vehicle_number,' . $vehicle->id,
             'owner_name' => 'nullable|string|max:255',
             'fixed_monthly_amount' => 'required|numeric|min:0',
+            'km_limit' => 'required|integer|min:0',
+            'extra_km_rate' => 'required|numeric|min:0',
             'ot_rate_per_hour' => 'required|numeric|min:0',
             'tds_percent' => 'required|numeric|min:0',
         ]);
 
-        $vehicle->update($request->all());
+        $vehicle->update($validated);
 
         return redirect()->route('vehicles.index')->with('success', 'Vehicle updated successfully.');
     }

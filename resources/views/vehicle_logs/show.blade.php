@@ -63,6 +63,8 @@
                     <tr><th>Opening Reading</th><td>{{ $vehicle_log->opening_reading }}</td></tr>
                     <tr><th>Closing Reading</th><td>{{ $vehicle_log->closing_reading }}</td></tr>
                     <tr><th>Total KM</th><td>{{ $vehicle_log->total_km }}</td></tr>
+                    <tr><th>KM Limit</th><td>{{ $vehicle_log->km_limit }}</td></tr>
+                    <tr><th>Extra KM</th><td>{{ $vehicle_log->extra_km }}</td></tr>
                     <tr><th>Diesel Total</th><td>{{ $vehicle_log->diesel_total }}</td></tr>
                     <tr><th>Average</th><td>{{ $vehicle_log->average_kmpl }}</td></tr>
                 </table>
@@ -74,6 +76,8 @@
                     <tr><th>OT Hrs</th><td>{{ $vehicle_log->formatted_ot }}</td></tr>
                     <tr><th>OT Rate</th><td>{{ number_format($vehicle_log->vehicle->ot_rate_per_hour, 2) }}</td></tr>
                     <tr><th>Total OT Amount</th><td>{{ number_format($vehicle_log->total_ot_amount, 2) }}</td></tr>
+                    <tr><th>Extra KM Rate</th><td>{{ number_format($vehicle_log->extra_km_rate, 2) }}</td></tr>
+                    <tr><th>Extra KM Amount</th><td>{{ number_format($vehicle_log->extra_km_amount, 2) }}</td></tr>
                     <tr><th>Total Billing Amount</th><td>{{ number_format($vehicle_log->total_billing_amount, 2) }}</td></tr>
                     <tr><th>TDS {{ $vehicle_log->tds_percent }}%</th><td>{{ number_format($vehicle_log->tds_amount, 2) }}</td></tr>
                     <tr><th>Net Payable</th><td><strong>{{ number_format($vehicle_log->net_payable, 2) }}</strong></td></tr>

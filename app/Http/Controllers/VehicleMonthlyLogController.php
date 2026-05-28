@@ -58,6 +58,10 @@ class VehicleMonthlyLogController extends Controller
                 'total_ot_minutes' => 0,
                 'total_ot_hours' => 0,
                 'total_ot_amount' => 0,
+                'km_limit' => $vehicle->km_limit,
+                'extra_km_rate' => $vehicle->extra_km_rate,
+                'extra_km' => 0,
+                'extra_km_amount' => 0,
                 'total_billing_amount' => $vehicle->fixed_monthly_amount,
                 'tds_amount' => 0,
                 'net_payable' => $vehicle->fixed_monthly_amount,
@@ -265,7 +269,11 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
         $average = $dieselTotal > 0 ? ($readingDiff / $dieselTotal) : 0;
         $totalOtHours = $totalOtMinutes / 60;
         $totalOtAmount = $totalOtHours * (float)$vehicle_log->vehicle->ot_rate_per_hour;
-        $totalBilling = (float)$vehicle_log->vehicle->fixed_monthly_amount + $totalOtAmount;
+        $kmLimit = (int)($vehicle_log->km_limit ?? Vehicle::DEFAULT_KM_LIMIT);
+        $extraKmRate = (float)($vehicle_log->extra_km_rate ?? Vehicle::DEFAULT_EXTRA_KM_RATE);
+        $extraKm = max(0, $readingDiff - $kmLimit);
+        $extraKmAmount = $extraKm * $extraKmRate;
+        $totalBilling = (float)$vehicle_log->vehicle->fixed_monthly_amount + $totalOtAmount + $extraKmAmount;
         $tdsAmount = ($totalBilling * (float)$vehicle_log->vehicle->tds_percent) / 100;
         $netPayable = $totalBilling - $tdsAmount;
 
@@ -278,6 +286,10 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
             'total_ot_minutes' => $totalOtMinutes,
             'total_ot_hours' => round($totalOtHours, 2),
             'total_ot_amount' => round($totalOtAmount, 2),
+            'km_limit' => $kmLimit,
+            'extra_km_rate' => round($extraKmRate, 2),
+            'extra_km' => $extraKm,
+            'extra_km_amount' => round($extraKmAmount, 2),
             'total_billing_amount' => round($totalBilling, 2),
             'tds_amount' => round($tdsAmount, 2),
             'net_payable' => round($netPayable, 2),

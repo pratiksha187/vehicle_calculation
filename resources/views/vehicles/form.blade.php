@@ -20,6 +20,16 @@
     </div>
 
     <div class="col-md-4">
+        <label class="form-label">KM Limit Per Month</label>
+        <input type="number" name="km_limit" class="form-control" value="{{ old('km_limit', $vehicle->km_limit ?? \App\Models\Vehicle::DEFAULT_KM_LIMIT) }}">
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label">Extra KM Rate</label>
+        <input type="number" step="0.01" name="extra_km_rate" class="form-control" value="{{ old('extra_km_rate', $vehicle->extra_km_rate ?? \App\Models\Vehicle::DEFAULT_EXTRA_KM_RATE) }}">
+    </div>
+
+    <div class="col-md-4">
         <label class="form-label">OT Rate Per Hour</label>
         <input type="number" step="0.01" name="ot_rate_per_hour" class="form-control" value="{{ old('ot_rate_per_hour', $vehicle->ot_rate_per_hour ?? 55.56) }}">
     </div>

@@ -16,6 +16,8 @@
                     <th>Vehicle Number</th>
                     <th>Owner</th>
                     <th>Fixed Amount</th>
+                    <th>KM Limit</th>
+                    <th>Extra KM Rate</th>
                     <th>OT Rate</th>
                     <th>TDS %</th>
                     <th>Action</th>
@@ -29,6 +31,8 @@
                         <td>{{ $vehicle->vehicle_number }}</td>
                         <td>{{ $vehicle->owner_name }}</td>
                         <td>{{ number_format($vehicle->fixed_monthly_amount, 2) }}</td>
+                        <td>{{ $vehicle->km_limit }}</td>
+                        <td>{{ number_format($vehicle->extra_km_rate, 2) }}</td>
                         <td>{{ number_format($vehicle->ot_rate_per_hour, 2) }}</td>
                         <td>{{ $vehicle->tds_percent }}</td>
                         <td>
@@ -41,7 +45,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="8" class="text-center">No vehicles found.</td></tr>
+                    <tr><td colspan="10" class="text-center">No vehicles found.</td></tr>
                 @endforelse
             </tbody>
         </table>

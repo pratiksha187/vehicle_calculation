@@ -345,6 +345,9 @@ $amountInWords = numberToWordsIndian($roundedNetPayable);
                             OT Hours: {{ $vehicle_log->formatted_ot }}<br>
                             OT Amount: ₹ {{ number_format($vehicle_log->total_ot_amount, 2) }}<br>
                             Total KM: {{ $vehicle_log->total_km }}<br>
+                            KM Limit: {{ $vehicle_log->km_limit }}<br>
+                            Extra KM: {{ $vehicle_log->extra_km }} x Rs. {{ number_format($vehicle_log->extra_km_rate, 2) }}<br>
+                            Extra KM Amount: Rs. {{ number_format($vehicle_log->extra_km_amount, 2) }}<br>
                             Diesel Total: {{ number_format($vehicle_log->diesel_total, 2) }}
                         </td>
                         <td class="right">₹ {{ number_format($subtotal, 2) }}</td>

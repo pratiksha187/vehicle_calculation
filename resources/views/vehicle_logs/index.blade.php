@@ -16,6 +16,7 @@
                     <th>Period</th>
                     <th>Total KM</th>
                     <th>Diesel</th>
+                    <th>Extra KM</th>
                     <th>OT Hours</th>
                     <th>Total Billing</th>
                     <th>Net Payable</th>
@@ -30,6 +31,7 @@
                         <td>{{ $log->from_date->format('d-m-Y') }} to {{ $log->to_date->format('d-m-Y') }}</td>
                         <td>{{ $log->total_km }}</td>
                         <td>{{ $log->diesel_total }}</td>
+                        <td>{{ $log->extra_km }}</td>
                         <td>{{ $log->formatted_ot }}</td>
                         <td>{{ number_format($log->total_billing_amount, 2) }}</td>
                         <td>{{ number_format($log->net_payable, 2) }}</td>
@@ -46,7 +48,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="9" class="text-center">No monthly logs found.</td></tr>
+                    <tr><td colspan="10" class="text-center">No monthly logs found.</td></tr>
                 @endforelse
             </tbody>
         </table>
