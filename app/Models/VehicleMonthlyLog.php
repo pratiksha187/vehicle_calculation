@@ -49,6 +49,26 @@ class VehicleMonthlyLog extends Model
         return self::formatMinutes($this->total_ot_minutes);
     }
 
+    public function syncBillingTotalsFromSavedTotals(): void
+    {
+        $kmLimit = (int)($this->km_limit ?? Vehicle::DEFAULT_KM_LIMIT);
+        $extraKmRate = (float)($this->extra_km_rate ?? Vehicle::DEFAULT_EXTRA_KM_RATE);
+        $extraKm = max(0, (int)$this->total_km - $kmLimit);
+        $extraKmAmount = $extraKm * $extraKmRate;
+        $totalBilling = (float)$this->fixed_monthly_amount + (float)$this->total_ot_amount + $extraKmAmount;
+        $tdsAmount = ($totalBilling * (float)$this->tds_percent) / 100;
+
+        $this->update([
+            'km_limit' => $kmLimit,
+            'extra_km_rate' => round($extraKmRate, 2),
+            'extra_km' => $extraKm,
+            'extra_km_amount' => round($extraKmAmount, 2),
+            'total_billing_amount' => round($totalBilling, 2),
+            'tds_amount' => round($tdsAmount, 2),
+            'net_payable' => round($totalBilling - $tdsAmount, 2),
+        ]);
+    }
+
     public static function formatMinutes($minutes)
     {
         $hours = floor($minutes / 60);

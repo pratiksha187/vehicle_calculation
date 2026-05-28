@@ -93,19 +93,21 @@ class VehicleMonthlyLogController extends Controller
 
     public function show(VehicleMonthlyLog $vehicle_log)
     {
-        $vehicle_log->load(['vehicle', 'dailyEntries']);
+        $vehicle_log = $this->regenerateMonthlyLogForBilling($vehicle_log);
+
         return view('vehicle_logs.show', compact('vehicle_log'));
     }
     public function bill(VehicleMonthlyLog $vehicle_log)
 {
-    $vehicle_log->load(['vehicle', 'dailyEntries']);
+    $vehicle_log = $this->regenerateMonthlyLogForBilling($vehicle_log);
+
     return view('vehicle_logs.bill', compact('vehicle_log'));
 }
 
 
 public function invoice(VehicleMonthlyLog $vehicle_log)
 {
-    $vehicle_log->load(['vehicle', 'dailyEntries']);
+    $vehicle_log = $this->regenerateMonthlyLogForBilling($vehicle_log);
 
     $subtotal = $vehicle_log->total_billing_amount;
     $tdsPercent = $vehicle_log->tds_percent;
@@ -273,8 +275,10 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
         $extraKmRate = (float)($vehicle_log->extra_km_rate ?? Vehicle::DEFAULT_EXTRA_KM_RATE);
         $extraKm = max(0, $readingDiff - $kmLimit);
         $extraKmAmount = $extraKm * $extraKmRate;
-        $totalBilling = (float)$vehicle_log->vehicle->fixed_monthly_amount + $totalOtAmount + $extraKmAmount;
-        $tdsAmount = ($totalBilling * (float)$vehicle_log->vehicle->tds_percent) / 100;
+        $fixedMonthlyAmount = (float)$vehicle_log->fixed_monthly_amount;
+        $tdsPercent = (float)$vehicle_log->tds_percent;
+        $totalBilling = $fixedMonthlyAmount + $totalOtAmount + $extraKmAmount;
+        $tdsAmount = ($totalBilling * $tdsPercent) / 100;
         $netPayable = $totalBilling - $tdsAmount;
 
         $vehicle_log->update([
@@ -294,6 +298,13 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
             'tds_amount' => round($tdsAmount, 2),
             'net_payable' => round($netPayable, 2),
         ]);
+    }
+
+    private function regenerateMonthlyLogForBilling(VehicleMonthlyLog $vehicle_log): VehicleMonthlyLog
+    {
+        $this->recalculateMonthlyLog($vehicle_log);
+
+        return $vehicle_log->refresh()->load(['vehicle', 'dailyEntries']);
     }
 
     private function calculateMinutes(?string $inTime, ?string $outTime): array
