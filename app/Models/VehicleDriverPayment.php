@@ -14,6 +14,7 @@ class VehicleDriverPayment extends Model
 
     protected $fillable = [
         'vehicle_monthly_log_id',
+        'driver_name',
         'fixed_payment',
         'ot_minutes',
         'ot_hours',

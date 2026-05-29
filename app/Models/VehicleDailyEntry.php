@@ -10,6 +10,7 @@ class VehicleDailyEntry extends Model
         'vehicle_monthly_log_id',
         'entry_date',
         'day',
+        'driver_name',
         'challan_no',
         'diesel_added',
         'start_reading',

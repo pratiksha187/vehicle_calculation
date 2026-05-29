@@ -15,7 +15,7 @@ class VehicleMonthlyLogController extends Controller
 {
     public function index()
     {
-        $logs = VehicleMonthlyLog::with(['vehicle', 'driverPayment'])->latest()->paginate(10);
+        $logs = VehicleMonthlyLog::with(['vehicle', 'driverPayments'])->latest()->paginate(10);
         return view('vehicle_logs.index', compact('logs'));
     }
 
@@ -75,6 +75,7 @@ class VehicleMonthlyLogController extends Controller
                     'vehicle_monthly_log_id' => $vehicle_log->id,
                     'entry_date' => $date->format('Y-m-d'),
                     'day' => $date->format('D'),
+                    'driver_name' => 'Driver 1',
                     'challan_no' => null,
                     'diesel_added' => 0,
                     'start_reading' => 0,
@@ -89,6 +90,7 @@ class VehicleMonthlyLogController extends Controller
             }
 
             $vehicle_log->driverPayment()->create([
+                'driver_name' => 'Driver 1',
                 'fixed_payment' => VehicleDriverPayment::DEFAULT_FIXED_PAYMENT,
                 'ot_rate_per_hour' => VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR,
                 'total_payment' => VehicleDriverPayment::DEFAULT_FIXED_PAYMENT,
@@ -149,6 +151,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
         $request->validate([
             'entries' => 'required|array|min:1',
             'entries.*.entry_date' => 'required|date',
+            'entries.*.driver_name' => 'nullable|string|max:255',
             'entries.*.challan_no' => 'nullable|string|max:255',
             'entries.*.diesel_added' => 'nullable|numeric|min:0',
             'entries.*.start_reading' => 'nullable|integer|min:0',
@@ -176,6 +179,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
                     'vehicle_monthly_log_id' => $vehicle_log->id,
                     'entry_date' => $row['entry_date'],
                     'day' => Carbon::parse($row['entry_date'])->format('D'),
+                    'driver_name' => $row['driver_name'] ?? 'Driver 1',
                     'challan_no' => $row['challan_no'] ?? null,
                     'diesel_added' => $dieselAdded,
                     'start_reading' => $startReading,
@@ -212,6 +216,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
         $request->validate([
             'entries' => 'required|array|min:1',
             'entries.*.id' => 'required|exists:vehicle_daily_entries,id',
+            'entries.*.driver_name' => 'nullable|string|max:255',
             'entries.*.challan_no' => 'nullable|string|max:255',
             'entries.*.diesel_added' => 'nullable|numeric|min:0',
             'entries.*.start_reading' => 'nullable|integer|min:0',
@@ -236,6 +241,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
                 $minutesData = $this->calculateMinutes($row['in_time'] ?? null, $row['out_time'] ?? null);
 
                 $entry->update([
+                    'driver_name' => $row['driver_name'] ?? 'Driver 1',
                     'challan_no' => $row['challan_no'] ?? null,
                     'diesel_added' => $dieselAdded,
                     'start_reading' => $startReading,
@@ -320,7 +326,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
     {
         $this->recalculateMonthlyLog($vehicle_log);
 
-        return $vehicle_log->refresh()->load(['vehicle', 'dailyEntries', 'driverPayment']);
+        return $vehicle_log->refresh()->load(['vehicle', 'dailyEntries', 'driverPayments']);
     }
 
     private function calculateMinutes(?string $inTime, ?string $outTime): array

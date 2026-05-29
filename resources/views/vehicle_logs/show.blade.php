@@ -23,6 +23,7 @@
                         <th>Sr No</th>
                         <th>Date</th>
                         <th>Day</th>
+                        <th>Driver</th>
                         <th>Challan No</th>
                         <th>Diesel Added</th>
                         <th>Start Reading</th>
@@ -41,6 +42,7 @@
                             <td>{{ $index + 1 }}</td>
                             <td>{{ $entry->entry_date->format('d/m/Y') }}</td>
                             <td>{{ $entry->day }}</td>
+                            <td>{{ $entry->driver_name }}</td>
                             <td>{{ $entry->challan_no }}</td>
                             <td>{{ $entry->diesel_added }}</td>
                             <td>{{ $entry->start_reading }}</td>

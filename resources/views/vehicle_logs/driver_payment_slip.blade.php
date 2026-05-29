@@ -2,7 +2,7 @@
 
 @section('content')
 @php
-    $driverPayment = $vehicle_log->driverPayment;
+    $driverPayments = $vehicle_log->driverPayments;
 @endphp
 
 <style>
@@ -109,26 +109,46 @@
                 </tr>
             </table>
 
+            @forelse($driverPayments as $driverPayment)
+                <table class="driver-slip-table">
+                    <tr>
+                        <th>Driver Name</th>
+                        <td>{{ $driverPayment->driver_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Fixed Driver Payment</th>
+                        <td class="right">Rs. {{ number_format($driverPayment->fixed_payment, 2) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total Working OT After 12 Hours</th>
+                        <td class="right">{{ $driverPayment->formatted_ot }}</td>
+                    </tr>
+                    <tr>
+                        <th>Driver OT Rate</th>
+                        <td class="right">Rs. {{ number_format($driverPayment->ot_rate_per_hour, 2) }} / hour</td>
+                    </tr>
+                    <tr>
+                        <th>Driver OT Amount</th>
+                        <td class="right">Rs. {{ number_format($driverPayment->ot_amount, 2) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total Driver Payment</th>
+                        <td class="right"><strong>Rs. {{ number_format($driverPayment->total_payment, 2) }}</strong></td>
+                    </tr>
+                </table>
+            @empty
+                <table class="driver-slip-table">
+                    <tr>
+                        <th>Total Driver Payment</th>
+                        <td class="right"><strong>Rs. 20,000.00</strong></td>
+                    </tr>
+                </table>
+            @endforelse
+
             <table class="driver-slip-table">
                 <tr>
-                    <th>Fixed Driver Payment</th>
-                    <td class="right">Rs. {{ number_format($driverPayment->fixed_payment ?? 20000, 2) }}</td>
-                </tr>
-                <tr>
-                    <th>Total Working OT After 12 Hours</th>
-                    <td class="right">{{ $driverPayment->formatted_ot ?? '00:00' }}</td>
-                </tr>
-                <tr>
-                    <th>Driver OT Rate</th>
-                    <td class="right">Rs. {{ number_format($driverPayment->ot_rate_per_hour ?? 50, 2) }} / hour</td>
-                </tr>
-                <tr>
-                    <th>Driver OT Amount</th>
-                    <td class="right">Rs. {{ number_format($driverPayment->ot_amount ?? 0, 2) }}</td>
-                </tr>
-                <tr>
-                    <th>Total Driver Payment</th>
-                    <td class="right"><strong>Rs. {{ number_format($driverPayment->total_payment ?? 20000, 2) }}</strong></td>
+                    <th>Grand Total Driver Payment</th>
+                    <td class="right"><strong>Rs. {{ number_format($driverPayments->sum('total_payment') ?: 20000, 2) }}</strong></td>
                 </tr>
             </table>
 

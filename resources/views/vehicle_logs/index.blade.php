@@ -34,7 +34,7 @@
                         <td>{{ $log->diesel_total }}</td>
                         <td>{{ $log->extra_km }}</td>
                         <td>{{ $log->formatted_ot }}</td>
-                        <td>{{ number_format(optional($log->driverPayment)->total_payment ?? 20000, 2) }}</td>
+                        <td>{{ number_format($log->driverPayments->sum('total_payment') ?: 20000, 2) }}</td>
                         <td>{{ number_format($log->total_billing_amount, 2) }}</td>
                         <td>{{ number_format($log->net_payable, 2) }}</td>
                         <td>

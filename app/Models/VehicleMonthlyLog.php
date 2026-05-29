@@ -49,6 +49,11 @@ class VehicleMonthlyLog extends Model
         return $this->hasOne(VehicleDriverPayment::class);
     }
 
+    public function driverPayments()
+    {
+        return $this->hasMany(VehicleDriverPayment::class);
+    }
+
     public function getFormattedOtAttribute()
     {
         return self::formatMinutes($this->total_ot_minutes);
@@ -79,22 +84,39 @@ class VehicleMonthlyLog extends Model
     public function syncDriverPaymentFromSavedTotals(): void
     {
         $fixedPayment = VehicleDriverPayment::DEFAULT_FIXED_PAYMENT;
-        $otMinutes = (int)$this->total_ot_minutes;
-        $otHours = $otMinutes / 60;
         $otRate = VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR;
-        $otAmount = $otHours * $otRate;
+        $driverTotals = $this->dailyEntries()
+            ->selectRaw("COALESCE(NULLIF(driver_name, ''), 'Driver 1') as driver_name, SUM(ot_minutes) as ot_minutes")
+            ->groupBy('driver_name')
+            ->get();
 
-        $this->driverPayment()->updateOrCreate(
-            ['vehicle_monthly_log_id' => $this->id],
-            [
-                'fixed_payment' => $fixedPayment,
-                'ot_minutes' => $otMinutes,
-                'ot_hours' => round($otHours, 2),
-                'ot_rate_per_hour' => $otRate,
-                'ot_amount' => round($otAmount, 2),
-                'total_payment' => round($fixedPayment + $otAmount, 2),
-            ]
-        );
+        if ($driverTotals->isEmpty()) {
+            $driverTotals = collect([(object)[
+                'driver_name' => 'Driver 1',
+                'ot_minutes' => (int)$this->total_ot_minutes,
+            ]]);
+        }
+
+        $driverNames = $driverTotals->pluck('driver_name')->all();
+        $this->driverPayments()->whereNotIn('driver_name', $driverNames)->delete();
+
+        foreach ($driverTotals as $driverTotal) {
+            $otMinutes = (int)$driverTotal->ot_minutes;
+            $otHours = $otMinutes / 60;
+            $otAmount = $otHours * $otRate;
+
+            $this->driverPayments()->updateOrCreate(
+                ['driver_name' => $driverTotal->driver_name ?: 'Driver 1'],
+                [
+                    'fixed_payment' => $fixedPayment,
+                    'ot_minutes' => $otMinutes,
+                    'ot_hours' => round($otHours, 2),
+                    'ot_rate_per_hour' => $otRate,
+                    'ot_amount' => round($otAmount, 2),
+                    'total_payment' => round($fixedPayment + $otAmount, 2),
+                ]
+            );
+        }
     }
 
     public static function formatMinutes($minutes)

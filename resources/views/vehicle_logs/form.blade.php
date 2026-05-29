@@ -2,6 +2,7 @@
     $entries = old('entries', isset($log) && $log ? $log->dailyEntries->map(function($e){
         return [
             'entry_date' => $e->entry_date->format('Y-m-d'),
+            'driver_name' => $e->driver_name ?: 'Driver 1',
             'challan_no' => $e->challan_no,
             'diesel_added' => $e->diesel_added,
             'start_reading' => $e->start_reading,
@@ -48,6 +49,7 @@
         <thead class="table-dark">
             <tr>
                 <th>Date</th>
+                <th>Driver</th>
                 <th>Challan No</th>
                 <th>Diesel</th>
                 <th>Start Reading</th>
@@ -62,6 +64,7 @@
             @foreach($entries as $index => $entry)
                 <tr>
                     <td><input type="date" name="entries[{{ $index }}][entry_date]" class="form-control" value="{{ $entry['entry_date'] ?? '' }}" required></td>
+                    <td><input type="text" name="entries[{{ $index }}][driver_name]" class="form-control" value="{{ $entry['driver_name'] ?? 'Driver 1' }}" list="driverNames"></td>
                     <td><input type="text" name="entries[{{ $index }}][challan_no]" class="form-control" value="{{ $entry['challan_no'] ?? '' }}"></td>
                     <td><input type="number" step="0.01" name="entries[{{ $index }}][diesel_added]" class="form-control" value="{{ $entry['diesel_added'] ?? 0 }}"></td>
                     <td><input type="number" name="entries[{{ $index }}][start_reading]" class="form-control" value="{{ $entry['start_reading'] ?? '' }}" required></td>
@@ -75,6 +78,11 @@
         </tbody>
     </table>
 </div>
+
+<datalist id="driverNames">
+    <option value="Driver 1">
+    <option value="Driver 2">
+</datalist>
 
 <div class="mt-3">
     <button class="btn btn-success">Save Monthly Log</button>
@@ -92,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         tr.innerHTML = `
             <td><input type="date" name="entries[${rowIndex}][entry_date]" class="form-control" required></td>
+            <td><input type="text" name="entries[${rowIndex}][driver_name]" class="form-control" value="Driver 1" list="driverNames"></td>
             <td><input type="text" name="entries[${rowIndex}][challan_no]" class="form-control"></td>
             <td><input type="number" step="0.01" name="entries[${rowIndex}][diesel_added]" class="form-control" value="0"></td>
             <td><input type="number" name="entries[${rowIndex}][start_reading]" class="form-control" required></td>
