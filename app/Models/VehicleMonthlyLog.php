@@ -86,6 +86,7 @@ class VehicleMonthlyLog extends Model
         $fixedPayment = VehicleDriverPayment::DEFAULT_FIXED_PAYMENT;
         $otRate = VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR;
         $driverTotals = $this->dailyEntries()
+            ->reorder()
             ->selectRaw("COALESCE(NULLIF(driver_name, ''), 'Driver 1') as driver_name, SUM(ot_minutes) as ot_minutes")
             ->groupBy('driver_name')
             ->get();
