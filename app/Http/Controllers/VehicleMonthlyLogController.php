@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Vehicle;
 use App\Models\VehicleDailyEntry;
+use App\Models\VehicleDriverPayment;
 use App\Models\VehicleMonthlyLog;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -14,7 +15,7 @@ class VehicleMonthlyLogController extends Controller
 {
     public function index()
     {
-        $logs = VehicleMonthlyLog::with('vehicle')->latest()->paginate(10);
+        $logs = VehicleMonthlyLog::with(['vehicle', 'driverPayment'])->latest()->paginate(10);
         return view('vehicle_logs.index', compact('logs'));
     }
 
@@ -86,6 +87,12 @@ class VehicleMonthlyLogController extends Controller
                     'remark' => null,
                 ]);
             }
+
+            $vehicle_log->driverPayment()->create([
+                'fixed_payment' => VehicleDriverPayment::DEFAULT_FIXED_PAYMENT,
+                'ot_rate_per_hour' => VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR,
+                'total_payment' => VehicleDriverPayment::DEFAULT_FIXED_PAYMENT,
+            ]);
         });
 
         return redirect()->route('vehicle-logs.index')->with('success', 'Monthly sheet created successfully.');
@@ -298,13 +305,15 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
             'tds_amount' => round($tdsAmount, 2),
             'net_payable' => round($netPayable, 2),
         ]);
+
+        $vehicle_log->syncDriverPaymentFromSavedTotals();
     }
 
     private function regenerateMonthlyLogForBilling(VehicleMonthlyLog $vehicle_log): VehicleMonthlyLog
     {
         $this->recalculateMonthlyLog($vehicle_log);
 
-        return $vehicle_log->refresh()->load(['vehicle', 'dailyEntries']);
+        return $vehicle_log->refresh()->load(['vehicle', 'dailyEntries', 'driverPayment']);
     }
 
     private function calculateMinutes(?string $inTime, ?string $outTime): array

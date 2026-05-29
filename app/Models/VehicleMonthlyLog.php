@@ -44,6 +44,11 @@ class VehicleMonthlyLog extends Model
         return $this->hasMany(VehicleDailyEntry::class)->orderBy('entry_date');
     }
 
+    public function driverPayment()
+    {
+        return $this->hasOne(VehicleDriverPayment::class);
+    }
+
     public function getFormattedOtAttribute()
     {
         return self::formatMinutes($this->total_ot_minutes);
@@ -67,6 +72,29 @@ class VehicleMonthlyLog extends Model
             'tds_amount' => round($tdsAmount, 2),
             'net_payable' => round($totalBilling - $tdsAmount, 2),
         ]);
+
+        $this->syncDriverPaymentFromSavedTotals();
+    }
+
+    public function syncDriverPaymentFromSavedTotals(): void
+    {
+        $fixedPayment = VehicleDriverPayment::DEFAULT_FIXED_PAYMENT;
+        $otMinutes = (int)$this->total_ot_minutes;
+        $otHours = $otMinutes / 60;
+        $otRate = VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR;
+        $otAmount = $otHours * $otRate;
+
+        $this->driverPayment()->updateOrCreate(
+            ['vehicle_monthly_log_id' => $this->id],
+            [
+                'fixed_payment' => $fixedPayment,
+                'ot_minutes' => $otMinutes,
+                'ot_hours' => round($otHours, 2),
+                'ot_rate_per_hour' => $otRate,
+                'ot_amount' => round($otAmount, 2),
+                'total_payment' => round($fixedPayment + $otAmount, 2),
+            ]
+        );
     }
 
     public static function formatMinutes($minutes)

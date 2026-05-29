@@ -18,6 +18,7 @@
                     <th>Diesel</th>
                     <th>Extra KM</th>
                     <th>OT Hours</th>
+                    <th>Driver Payment</th>
                     <th>Total Billing</th>
                     <th>Net Payable</th>
                     <th>Action</th>
@@ -33,6 +34,7 @@
                         <td>{{ $log->diesel_total }}</td>
                         <td>{{ $log->extra_km }}</td>
                         <td>{{ $log->formatted_ot }}</td>
+                        <td>{{ number_format(optional($log->driverPayment)->total_payment ?? 20000, 2) }}</td>
                         <td>{{ number_format($log->total_billing_amount, 2) }}</td>
                         <td>{{ number_format($log->net_payable, 2) }}</td>
                         <td>
@@ -48,7 +50,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="10" class="text-center">No monthly logs found.</td></tr>
+                    <tr><td colspan="11" class="text-center">No monthly logs found.</td></tr>
                 @endforelse
             </tbody>
         </table>
