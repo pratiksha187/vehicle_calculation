@@ -83,16 +83,6 @@
                     <tr><th>Net Payable</th><td><strong>{{ number_format($vehicle_log->net_payable, 2) }}</strong></td></tr>
                 </table>
             </div>
-
-            <div class="col-md-5">
-                <table class="table table-bordered">
-                    <tr><th>Driver Fixed Payment</th><td>{{ number_format(optional($vehicle_log->driverPayment)->fixed_payment ?? 20000, 2) }}</td></tr>
-                    <tr><th>Driver OT Hrs</th><td>{{ optional($vehicle_log->driverPayment)->formatted_ot ?? '00:00' }}</td></tr>
-                    <tr><th>Driver OT Rate</th><td>{{ number_format(optional($vehicle_log->driverPayment)->ot_rate_per_hour ?? 50, 2) }}</td></tr>
-                    <tr><th>Driver OT Amount</th><td>{{ number_format(optional($vehicle_log->driverPayment)->ot_amount ?? 0, 2) }}</td></tr>
-                    <tr><th>Total Driver Payment</th><td><strong>{{ number_format(optional($vehicle_log->driverPayment)->total_payment ?? 20000, 2) }}</strong></td></tr>
-                </table>
-            </div>
         </div>
     </div>
 </div>

@@ -40,6 +40,7 @@
                         <td>
                             <a href="{{ route('vehicle-logs.show', $log->id) }}" class="btn btn-sm btn-info">View</a>
                              <a href="{{ route('vehicle-logs.invoice', $log->id) }}" class="btn btn-sm btn-success">Invoice</a>
+                            <a href="{{ route('vehicle-logs.driver-payment-slip', $log->id) }}" class="btn btn-sm btn-dark">Driver Payment</a>
                             <a href="{{ route('vehicle-logs.daily-entry', $log->id) }}" class="btn btn-sm btn-primary">Daily Entry</a>
                             <a href="{{ route('vehicle-logs.edit', $log->id) }}" class="btn btn-sm btn-warning">Edit</a>
                             <form action="{{ route('vehicle-logs.destroy', $log->id) }}" method="POST" class="d-inline">

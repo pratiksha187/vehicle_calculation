@@ -131,6 +131,13 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
     ));
 }
 
+    public function driverPaymentSlip(VehicleMonthlyLog $vehicle_log)
+    {
+        $vehicle_log = $this->regenerateMonthlyLogForBilling($vehicle_log);
+
+        return view('vehicle_logs.driver_payment_slip', compact('vehicle_log'));
+    }
+
     public function edit(VehicleMonthlyLog $vehicle_log)
     {
         $vehicle_log->load(['vehicle', 'dailyEntries']);

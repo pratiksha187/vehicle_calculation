@@ -17,6 +17,9 @@ Route::resource('vehicle-logs', VehicleMonthlyLogController::class)->parameters(
 Route::get('vehicle-logs/{vehicle_log}/invoice', [App\Http\Controllers\VehicleMonthlyLogController::class, 'invoice'])
     ->name('vehicle-logs.invoice');
 
+Route::get('vehicle-logs/{vehicle_log}/driver-payment-slip', [VehicleMonthlyLogController::class, 'driverPaymentSlip'])
+    ->name('vehicle-logs.driver-payment-slip');
+
 Route::get('vehicle-logs/{vehicle_log}/daily-entry', [VehicleMonthlyLogController::class, 'dailyEntry'])
     ->name('vehicle-logs.daily-entry');
 
@@ -25,7 +28,6 @@ Route::post('vehicle-logs/{vehicle_log}/daily-entry', [VehicleMonthlyLogControll
 
     Route::get('vehicle-logs/{vehicle_log}/bill', [VehicleMonthlyLogController::class, 'bill'])
     ->name('vehicle-logs.bill');
-
 
 
 
