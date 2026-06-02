@@ -8,6 +8,7 @@ class Vehicle extends Model
 {
     public const DEFAULT_KM_LIMIT = 3500;
     public const DEFAULT_EXTRA_KM_RATE = 5;
+    public const DEFAULT_TDS_PERCENT = 2;
 
     protected $fillable = [
         'vehicle_name',

@@ -14,7 +14,7 @@ return new class extends Migration {
             $table->string('owner_name')->nullable();
             $table->decimal('fixed_monthly_amount', 12, 2)->default(0);
             $table->decimal('ot_rate_per_hour', 12, 2)->default(0);
-            $table->decimal('tds_percent', 5, 2)->default(1);
+            $table->decimal('tds_percent', 5, 2)->default(2);
             $table->timestamps();
         });
     }

@@ -36,7 +36,7 @@
 
     <div class="col-md-4">
         <label class="form-label">TDS %</label>
-        <input type="number" step="0.01" name="tds_percent" class="form-control" value="{{ old('tds_percent', $vehicle->tds_percent ?? 1) }}">
+        <input type="number" step="0.01" name="tds_percent" class="form-control" value="{{ old('tds_percent', $vehicle->tds_percent ?? \App\Models\Vehicle::DEFAULT_TDS_PERCENT) }}">
     </div>
 
     <div class="col-12">

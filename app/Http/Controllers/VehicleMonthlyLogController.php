@@ -50,7 +50,7 @@ class VehicleMonthlyLogController extends Controller
                 'from_date' => $request->from_date,
                 'to_date' => $request->to_date,
                 'fixed_monthly_amount' => $vehicle->fixed_monthly_amount,
-                'tds_percent' => $vehicle->tds_percent,
+                'tds_percent' => $vehicle->tds_percent ?? Vehicle::DEFAULT_TDS_PERCENT,
                 'opening_reading' => 0,
                 'closing_reading' => 0,
                 'total_km' => 0,
@@ -296,7 +296,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
         $extraKm = max(0, $readingDiff - $kmLimit);
         $extraKmAmount = $extraKm * $extraKmRate;
         $fixedMonthlyAmount = (float)$vehicle_log->fixed_monthly_amount;
-        $tdsPercent = (float)$vehicle_log->tds_percent;
+        $tdsPercent = Vehicle::DEFAULT_TDS_PERCENT;
         $totalBilling = $fixedMonthlyAmount + $totalOtAmount + $extraKmAmount;
         $tdsAmount = ($totalBilling * $tdsPercent) / 100;
         $netPayable = $totalBilling - $tdsAmount;
@@ -315,6 +315,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
             'extra_km' => $extraKm,
             'extra_km_amount' => round($extraKmAmount, 2),
             'total_billing_amount' => round($totalBilling, 2),
+            'tds_percent' => $tdsPercent,
             'tds_amount' => round($tdsAmount, 2),
             'net_payable' => round($netPayable, 2),
         ]);

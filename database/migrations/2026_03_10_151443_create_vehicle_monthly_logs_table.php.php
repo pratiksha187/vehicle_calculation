@@ -27,7 +27,7 @@ return new class extends Migration {
 
             $table->decimal('fixed_monthly_amount', 12, 2)->default(0);
             $table->decimal('total_billing_amount', 12, 2)->default(0);
-            $table->decimal('tds_percent', 5, 2)->default(1);
+            $table->decimal('tds_percent', 5, 2)->default(2);
             $table->decimal('tds_amount', 12, 2)->default(0);
             $table->decimal('net_payable', 12, 2)->default(0);
 

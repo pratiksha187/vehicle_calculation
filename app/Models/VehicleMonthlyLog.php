@@ -66,7 +66,8 @@ class VehicleMonthlyLog extends Model
         $extraKm = max(0, (int)$this->total_km - $kmLimit);
         $extraKmAmount = $extraKm * $extraKmRate;
         $totalBilling = (float)$this->fixed_monthly_amount + (float)$this->total_ot_amount + $extraKmAmount;
-        $tdsAmount = ($totalBilling * (float)$this->tds_percent) / 100;
+        $tdsPercent = Vehicle::DEFAULT_TDS_PERCENT;
+        $tdsAmount = ($totalBilling * $tdsPercent) / 100;
 
         $this->update([
             'km_limit' => $kmLimit,
@@ -74,6 +75,7 @@ class VehicleMonthlyLog extends Model
             'extra_km' => $extraKm,
             'extra_km_amount' => round($extraKmAmount, 2),
             'total_billing_amount' => round($totalBilling, 2),
+            'tds_percent' => $tdsPercent,
             'tds_amount' => round($tdsAmount, 2),
             'net_payable' => round($totalBilling - $tdsAmount, 2),
         ]);
