@@ -16,7 +16,7 @@
         </div>
 
         <div class="alert alert-info py-2">
-            Add driver name and Present / Absent here. Driver monthly fixed payment is Rs. 20,000, calculated only for present days. Driver OT is Rs. 50/hour.
+            Add driver name and Present / Absent here for driver payment only. Vehicle daily entry and company monthly billing are separate.
         </div>
 
         <form action="{{ route('vehicle-logs.save-driver-details', $vehicle_log->id) }}" method="POST">
