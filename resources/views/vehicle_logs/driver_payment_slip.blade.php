@@ -130,7 +130,7 @@
                         <td class="right">{{ $attendanceSummary[$driverPayment->driver_name]['absent'] ?? 0 }}</td>
                     </tr>
                     <tr>
-                        <th>Fixed Driver Payment</th>
+                        <th>Present Day Payment</th>
                         <td class="right">Rs. {{ number_format($driverPayment->fixed_payment, 2) }}</td>
                     </tr>
                     <tr>
@@ -152,7 +152,7 @@
                     <tr>
                         <th>Calculation</th>
                         <td class="right">
-                            Rs. 20,000 + ({{ number_format($driverPayment->ot_hours, 2) }} x Rs. {{ number_format($driverPayment->ot_rate_per_hour, 2) }})
+                            Rs. {{ number_format($driverPayment->fixed_payment, 2) }} + ({{ number_format($driverPayment->ot_hours, 2) }} x Rs. {{ number_format($driverPayment->ot_rate_per_hour, 2) }})
                         </td>
                     </tr>
                 </table>

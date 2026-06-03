@@ -16,7 +16,7 @@
         </div>
 
         <div class="alert alert-info py-2">
-            Add driver name and Present / Absent here. Fixed driver payment is Rs. 20,000 and driver OT is Rs. 50/hour.
+            Add driver name and Present / Absent here. Driver monthly fixed payment is Rs. 20,000, calculated only for present days. Driver OT is Rs. 50/hour.
         </div>
 
         <form action="{{ route('vehicle-logs.save-driver-details', $vehicle_log->id) }}" method="POST">
@@ -88,7 +88,7 @@
                             <th>Driver</th>
                             <th>Present Days</th>
                             <th>Absent Days</th>
-                            <th>Fixed Payment</th>
+                            <th>Present Day Payment</th>
                             <th>OT Hrs</th>
                             <th>Driver OT Rate</th>
                             <th>OT Amount</th>
@@ -106,7 +106,7 @@
                                 <td>{{ $payment->formatted_ot }}</td>
                                 <td>{{ number_format($payment->ot_rate_per_hour, 2) }}</td>
                                 <td>{{ number_format($payment->ot_amount, 2) }}</td>
-                                <td>20,000 + ({{ number_format($payment->ot_hours, 2) }} x {{ number_format($payment->ot_rate_per_hour, 2) }})</td>
+                                <td>{{ number_format($payment->fixed_payment, 2) }} + ({{ number_format($payment->ot_hours, 2) }} x {{ number_format($payment->ot_rate_per_hour, 2) }})</td>
                                 <td><strong>{{ number_format($payment->total_payment, 2) }}</strong></td>
                             </tr>
                         @endforeach

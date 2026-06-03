@@ -87,6 +87,7 @@ class VehicleMonthlyLog extends Model
     {
         $fixedPayment = VehicleDriverPayment::DEFAULT_FIXED_PAYMENT;
         $otRate = VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR;
+        $totalDays = max(1, $this->dailyEntries()->count());
         $driverTotals = $this->dailyEntries()
             ->reorder()
             ->selectRaw("COALESCE(NULLIF(driver_name, ''), 'Driver 1') as driver_name")
@@ -107,19 +108,21 @@ class VehicleMonthlyLog extends Model
         $this->driverPayments()->whereNotIn('driver_name', $driverNames)->delete();
 
         foreach ($driverTotals as $driverTotal) {
+            $presentDays = (int)$driverTotal->present_days;
             $otMinutes = (int)$driverTotal->ot_minutes;
             $otHours = $otMinutes / 60;
             $otAmount = $otHours * $otRate;
+            $payableFixedPayment = ($fixedPayment / $totalDays) * $presentDays;
 
             $this->driverPayments()->updateOrCreate(
                 ['driver_name' => $driverTotal->driver_name ?: 'Driver 1'],
                 [
-                    'fixed_payment' => $fixedPayment,
+                    'fixed_payment' => round($payableFixedPayment, 2),
                     'ot_minutes' => $otMinutes,
                     'ot_hours' => round($otHours, 2),
                     'ot_rate_per_hour' => $otRate,
                     'ot_amount' => round($otAmount, 2),
-                    'total_payment' => round($fixedPayment + $otAmount, 2),
+                    'total_payment' => round($payableFixedPayment + $otAmount, 2),
                 ]
             );
         }
