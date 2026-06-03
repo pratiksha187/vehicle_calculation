@@ -152,7 +152,7 @@
                     <tr>
                         <th>Calculation</th>
                         <td class="right">
-                            Rs. {{ number_format($driverPayment->fixed_payment, 2) }} + ({{ number_format($driverPayment->ot_hours, 2) }} x Rs. {{ number_format($driverPayment->ot_rate_per_hour, 2) }})
+                            Rs. {{ number_format($driverPayment->fixed_payment, 2) }} + ({{ $driverPayment->formatted_ot }} = {{ number_format($driverPayment->ot_hours, 2) }} hrs x Rs. {{ number_format($driverPayment->ot_rate_per_hour, 2) }})
                         </td>
                     </tr>
                 </table>

@@ -106,7 +106,7 @@
                                 <td>{{ $payment->formatted_ot }}</td>
                                 <td>{{ number_format($payment->ot_rate_per_hour, 2) }}</td>
                                 <td>{{ number_format($payment->ot_amount, 2) }}</td>
-                                <td>{{ number_format($payment->fixed_payment, 2) }} + ({{ number_format($payment->ot_hours, 2) }} x {{ number_format($payment->ot_rate_per_hour, 2) }})</td>
+                                <td>{{ number_format($payment->fixed_payment, 2) }} + ({{ $payment->formatted_ot }} = {{ number_format($payment->ot_hours, 2) }} hrs x {{ number_format($payment->ot_rate_per_hour, 2) }})</td>
                                 <td><strong>{{ number_format($payment->total_payment, 2) }}</strong></td>
                             </tr>
                         @endforeach

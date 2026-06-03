@@ -113,16 +113,18 @@ class VehicleMonthlyLog extends Model
             $otHours = $otMinutes / 60;
             $otAmount = $otHours * $otRate;
             $payableFixedPayment = ($fixedPayment / $totalDays) * $presentDays;
+            $roundedFixedPayment = round($payableFixedPayment, 2);
+            $roundedOtAmount = round($otAmount, 2);
 
             $this->driverPayments()->updateOrCreate(
                 ['driver_name' => $driverTotal->driver_name ?: 'Rohit'],
                 [
-                    'fixed_payment' => round($payableFixedPayment, 2),
+                    'fixed_payment' => $roundedFixedPayment,
                     'ot_minutes' => $otMinutes,
                     'ot_hours' => round($otHours, 2),
                     'ot_rate_per_hour' => $otRate,
-                    'ot_amount' => round($otAmount, 2),
-                    'total_payment' => round($payableFixedPayment + $otAmount, 2),
+                    'ot_amount' => $roundedOtAmount,
+                    'total_payment' => round($roundedFixedPayment + $roundedOtAmount, 2),
                 ]
             );
         }
