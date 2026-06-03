@@ -314,6 +314,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
         $closing = 0;
         $dieselTotal = 0;
         $totalOtMinutes = 0;
+        $totalKm = 0;
         $firstReadingFound = false;
 
         foreach ($entries as $entry) {
@@ -328,15 +329,15 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
 
             $dieselTotal += (float)$entry->diesel_added;
             $totalOtMinutes += (int)$entry->ot_minutes;
+            $totalKm += (int)$entry->total_km;
         }
 
-        $readingDiff = ($closing >= $opening) ? ($closing - $opening) : 0;
-        $average = $dieselTotal > 0 ? ($readingDiff / $dieselTotal) : 0;
+        $average = $dieselTotal > 0 ? ($totalKm / $dieselTotal) : 0;
         $totalOtHours = $totalOtMinutes / 60;
         $totalOtAmount = $totalOtHours * Vehicle::DEFAULT_COMPANY_OT_RATE_PER_HOUR;
         $kmLimit = (int)($vehicle_log->km_limit ?? Vehicle::DEFAULT_KM_LIMIT);
         $extraKmRate = (float)($vehicle_log->extra_km_rate ?? Vehicle::DEFAULT_EXTRA_KM_RATE);
-        $extraKm = max(0, $readingDiff - $kmLimit);
+        $extraKm = max(0, $totalKm - $kmLimit);
         $extraKmAmount = $extraKm * $extraKmRate;
         $fixedMonthlyAmount = (float)$vehicle_log->fixed_monthly_amount;
         $tdsPercent = Vehicle::DEFAULT_TDS_PERCENT;
@@ -347,7 +348,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
         $vehicle_log->update([
             'opening_reading' => $opening,
             'closing_reading' => $closing,
-            'total_km' => $readingDiff,
+            'total_km' => $totalKm,
             'diesel_total' => round($dieselTotal, 2),
             'average_kmpl' => round($average, 4),
             'total_ot_minutes' => $totalOtMinutes,
