@@ -11,6 +11,7 @@ class VehicleDailyEntry extends Model
         'entry_date',
         'day',
         'driver_name',
+        'attendance_status',
         'challan_no',
         'diesel_added',
         'start_reading',

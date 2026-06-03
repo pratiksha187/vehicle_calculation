@@ -4,6 +4,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3 no-print">
     <h3>Vehicle Bill</h3>
     <div>
+        <a href="{{ route('vehicle-logs.driver-details', $vehicle_log->id) }}" class="btn btn-secondary">Driver Details</a>
         <a href="{{ route('vehicle-logs.daily-entry', $vehicle_log->id) }}" class="btn btn-primary">Daily Entry</a>
         <button onclick="window.print()" class="btn btn-dark">Print</button>
     </div>
@@ -24,6 +25,7 @@
                         <th>Date</th>
                         <th>Day</th>
                         <th>Driver</th>
+                        <th>Status</th>
                         <th>Challan No</th>
                         <th>Diesel Added</th>
                         <th>Start Reading</th>
@@ -43,6 +45,7 @@
                             <td>{{ $entry->entry_date->format('d/m/Y') }}</td>
                             <td>{{ $entry->day }}</td>
                             <td>{{ $entry->driver_name }}</td>
+                            <td>{{ ucfirst($entry->attendance_status ?: 'present') }}</td>
                             <td>{{ $entry->challan_no }}</td>
                             <td>{{ $entry->diesel_added }}</td>
                             <td>{{ $entry->start_reading }}</td>

@@ -89,7 +89,10 @@ class VehicleMonthlyLog extends Model
         $otRate = VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR;
         $driverTotals = $this->dailyEntries()
             ->reorder()
-            ->selectRaw("COALESCE(NULLIF(driver_name, ''), 'Driver 1') as driver_name, SUM(ot_minutes) as ot_minutes")
+            ->selectRaw("COALESCE(NULLIF(driver_name, ''), 'Driver 1') as driver_name")
+            ->selectRaw("SUM(CASE WHEN attendance_status = 'present' THEN 1 ELSE 0 END) as present_days")
+            ->selectRaw("SUM(CASE WHEN attendance_status = 'absent' THEN 1 ELSE 0 END) as absent_days")
+            ->selectRaw("SUM(CASE WHEN attendance_status = 'present' THEN ot_minutes ELSE 0 END) as ot_minutes")
             ->groupBy('driver_name')
             ->get();
 

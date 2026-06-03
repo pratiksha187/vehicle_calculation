@@ -26,8 +26,12 @@ Route::get('vehicle-logs/{vehicle_log}/daily-entry', [VehicleMonthlyLogControlle
 Route::post('vehicle-logs/{vehicle_log}/daily-entry', [VehicleMonthlyLogController::class, 'saveDailyEntry'])
     ->name('vehicle-logs.save-daily-entry');
 
-    Route::get('vehicle-logs/{vehicle_log}/bill', [VehicleMonthlyLogController::class, 'bill'])
+Route::get('vehicle-logs/{vehicle_log}/driver-details', [VehicleMonthlyLogController::class, 'driverDetails'])
+    ->name('vehicle-logs.driver-details');
+
+Route::post('vehicle-logs/{vehicle_log}/driver-details', [VehicleMonthlyLogController::class, 'saveDriverDetails'])
+    ->name('vehicle-logs.save-driver-details');
+
+Route::get('vehicle-logs/{vehicle_log}/bill', [VehicleMonthlyLogController::class, 'bill'])
     ->name('vehicle-logs.bill');
-
-
 

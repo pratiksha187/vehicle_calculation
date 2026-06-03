@@ -15,6 +15,10 @@
             {{ $vehicle_log->from_date->format('d-m-Y') }} to {{ $vehicle_log->to_date->format('d-m-Y') }}
         </div>
 
+        <div class="mb-3">
+            <a href="{{ route('vehicle-logs.driver-details', $vehicle_log->id) }}" class="btn btn-sm btn-secondary">Driver Details</a>
+        </div>
+
         <form action="{{ route('vehicle-logs.save-daily-entry', $vehicle_log->id) }}" method="POST">
             @csrf
 

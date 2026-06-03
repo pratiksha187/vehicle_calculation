@@ -34,6 +34,7 @@
                                 <td>
                                     {{ $entry->entry_date->format('d/m/Y') }}
                                     <input type="hidden" name="entries[{{ $index }}][entry_date]" value="{{ $entry->entry_date->format('Y-m-d') }}">
+                                    <input type="hidden" name="entries[{{ $index }}][attendance_status]" value="{{ $entry->attendance_status ?: 'present' }}">
                                 </td>
                                 <td>{{ $entry->day }}</td>
                                 <td><input type="text" name="entries[{{ $index }}][driver_name]" value="{{ $entry->driver_name ?: 'Driver 1' }}" class="form-control form-control-sm" list="driverNames"></td>

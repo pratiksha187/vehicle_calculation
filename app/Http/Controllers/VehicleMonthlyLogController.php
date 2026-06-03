@@ -76,6 +76,7 @@ class VehicleMonthlyLogController extends Controller
                     'entry_date' => $date->format('Y-m-d'),
                     'day' => $date->format('D'),
                     'driver_name' => 'Driver 1',
+                    'attendance_status' => 'present',
                     'challan_no' => null,
                     'diesel_added' => 0,
                     'start_reading' => 0,
@@ -152,6 +153,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
             'entries' => 'required|array|min:1',
             'entries.*.entry_date' => 'required|date',
             'entries.*.driver_name' => 'nullable|string|max:255',
+            'entries.*.attendance_status' => 'nullable|in:present,absent',
             'entries.*.challan_no' => 'nullable|string|max:255',
             'entries.*.diesel_added' => 'nullable|numeric|min:0',
             'entries.*.start_reading' => 'nullable|integer|min:0',
@@ -174,19 +176,28 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
                     : 0;
 
                 $minutesData = $this->calculateMinutes($row['in_time'] ?? null, $row['out_time'] ?? null);
+                $attendanceStatus = $row['attendance_status'] ?? 'present';
+
+                if ($attendanceStatus === 'absent') {
+                    $minutesData = [
+                        'total_minutes' => 0,
+                        'ot_minutes' => 0,
+                    ];
+                }
 
                 VehicleDailyEntry::create([
                     'vehicle_monthly_log_id' => $vehicle_log->id,
                     'entry_date' => $row['entry_date'],
                     'day' => Carbon::parse($row['entry_date'])->format('D'),
                     'driver_name' => $row['driver_name'] ?? 'Driver 1',
+                    'attendance_status' => $attendanceStatus,
                     'challan_no' => $row['challan_no'] ?? null,
                     'diesel_added' => $dieselAdded,
                     'start_reading' => $startReading,
                     'end_reading' => $endReading,
                     'total_km' => $totalKm,
-                    'in_time' => !empty($row['in_time']) ? $row['in_time'] : null,
-                    'out_time' => !empty($row['out_time']) ? $row['out_time'] : null,
+                    'in_time' => $attendanceStatus === 'present' && !empty($row['in_time']) ? $row['in_time'] : null,
+                    'out_time' => $attendanceStatus === 'present' && !empty($row['out_time']) ? $row['out_time'] : null,
                     'total_minutes' => $minutesData['total_minutes'],
                     'ot_minutes' => $minutesData['ot_minutes'],
                     'remark' => $row['remark'] ?? null,
@@ -211,12 +222,58 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
         return view('vehicle_logs.daily_entry', compact('vehicle_log'));
     }
 
+    public function driverDetails(VehicleMonthlyLog $vehicle_log)
+    {
+        $vehicle_log->load(['vehicle', 'dailyEntries']);
+        return view('vehicle_logs.driver_details', compact('vehicle_log'));
+    }
+
+    public function saveDriverDetails(Request $request, VehicleMonthlyLog $vehicle_log)
+    {
+        $request->validate([
+            'entries' => 'required|array|min:1',
+            'entries.*.id' => 'required|exists:vehicle_daily_entries,id',
+            'entries.*.driver_name' => 'nullable|string|max:255',
+            'entries.*.attendance_status' => 'required|in:present,absent',
+            'entries.*.remark' => 'nullable|string',
+        ]);
+
+        DB::transaction(function () use ($request, $vehicle_log) {
+            foreach ($request->entries as $row) {
+                $entry = $vehicle_log->dailyEntries()->whereKey($row['id'])->firstOrFail();
+                $status = $row['attendance_status'];
+
+                $updates = [
+                    'driver_name' => ($row['driver_name'] ?? null) ?: 'Driver 1',
+                    'attendance_status' => $status,
+                    'remark' => $row['remark'] ?? null,
+                ];
+
+                if ($status === 'absent') {
+                    $updates = array_merge($updates, [
+                        'in_time' => null,
+                        'out_time' => null,
+                        'total_minutes' => 0,
+                        'ot_minutes' => 0,
+                    ]);
+                }
+
+                $entry->update($updates);
+            }
+
+            $this->recalculateMonthlyLog($vehicle_log);
+        });
+
+        return redirect()->route('vehicle-logs.driver-details', $vehicle_log->id)->with('success', 'Driver details and payment calculated successfully.');
+    }
+
     public function saveDailyEntry(Request $request, VehicleMonthlyLog $vehicle_log)
     {
         $request->validate([
             'entries' => 'required|array|min:1',
             'entries.*.id' => 'required|exists:vehicle_daily_entries,id',
             'entries.*.driver_name' => 'nullable|string|max:255',
+            'entries.*.attendance_status' => 'nullable|in:present,absent',
             'entries.*.challan_no' => 'nullable|string|max:255',
             'entries.*.diesel_added' => 'nullable|numeric|min:0',
             'entries.*.start_reading' => 'nullable|integer|min:0',
@@ -239,16 +296,25 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
                     : 0;
 
                 $minutesData = $this->calculateMinutes($row['in_time'] ?? null, $row['out_time'] ?? null);
+                $attendanceStatus = $row['attendance_status'] ?? $entry->attendance_status ?? 'present';
+
+                if ($attendanceStatus === 'absent') {
+                    $minutesData = [
+                        'total_minutes' => 0,
+                        'ot_minutes' => 0,
+                    ];
+                }
 
                 $entry->update([
                     'driver_name' => $row['driver_name'] ?? 'Driver 1',
+                    'attendance_status' => $attendanceStatus,
                     'challan_no' => $row['challan_no'] ?? null,
                     'diesel_added' => $dieselAdded,
                     'start_reading' => $startReading,
                     'end_reading' => $endReading,
                     'total_km' => $totalKm,
-                    'in_time' => !empty($row['in_time']) ? $row['in_time'] : null,
-                    'out_time' => !empty($row['out_time']) ? $row['out_time'] : null,
+                    'in_time' => $attendanceStatus === 'present' && !empty($row['in_time']) ? $row['in_time'] : null,
+                    'out_time' => $attendanceStatus === 'present' && !empty($row['out_time']) ? $row['out_time'] : null,
                     'total_minutes' => $minutesData['total_minutes'],
                     'ot_minutes' => $minutesData['ot_minutes'],
                     'remark' => $row['remark'] ?? null,
@@ -284,7 +350,9 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
             }
 
             $dieselTotal += (float)$entry->diesel_added;
-            $totalOtMinutes += (int)$entry->ot_minutes;
+            if (($entry->attendance_status ?: 'present') === 'present') {
+                $totalOtMinutes += (int)$entry->ot_minutes;
+            }
         }
 
         $readingDiff = ($closing >= $opening) ? ($closing - $opening) : 0;

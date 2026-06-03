@@ -3,6 +3,12 @@
 @section('content')
 @php
     $driverPayments = $vehicle_log->driverPayments;
+    $attendanceSummary = $vehicle_log->dailyEntries
+        ->groupBy(fn ($entry) => $entry->driver_name ?: 'Driver 1')
+        ->map(fn ($entries) => [
+            'present' => $entries->where('attendance_status', 'present')->count(),
+            'absent' => $entries->where('attendance_status', 'absent')->count(),
+        ]);
 @endphp
 
 <style>
@@ -114,6 +120,14 @@
                     <tr>
                         <th>Driver Name</th>
                         <td>{{ $driverPayment->driver_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Present Days</th>
+                        <td class="right">{{ $attendanceSummary[$driverPayment->driver_name]['present'] ?? 0 }}</td>
+                    </tr>
+                    <tr>
+                        <th>Absent Days</th>
+                        <td class="right">{{ $attendanceSummary[$driverPayment->driver_name]['absent'] ?? 0 }}</td>
                     </tr>
                     <tr>
                         <th>Fixed Driver Payment</th>
