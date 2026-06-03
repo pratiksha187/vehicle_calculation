@@ -14,7 +14,7 @@ return new class extends Migration {
 
         DB::table('vehicle_daily_entries')
             ->whereNull('driver_name')
-            ->update(['driver_name' => 'Driver 1']);
+            ->update(['driver_name' => 'Rohit']);
     }
 
     public function down(): void

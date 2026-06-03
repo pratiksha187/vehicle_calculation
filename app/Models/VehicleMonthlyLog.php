@@ -90,7 +90,7 @@ class VehicleMonthlyLog extends Model
         $totalDays = max(1, $this->dailyEntries()->count());
         $driverTotals = $this->dailyEntries()
             ->reorder()
-            ->selectRaw("COALESCE(NULLIF(driver_name, ''), 'Driver 1') as driver_name")
+            ->selectRaw("COALESCE(NULLIF(driver_name, ''), 'Rohit') as driver_name")
             ->selectRaw("SUM(CASE WHEN attendance_status IS NULL OR attendance_status = 'present' THEN 1 ELSE 0 END) as present_days")
             ->selectRaw("SUM(CASE WHEN attendance_status = 'absent' THEN 1 ELSE 0 END) as absent_days")
             ->selectRaw("SUM(CASE WHEN attendance_status IS NULL OR attendance_status = 'present' THEN ot_minutes ELSE 0 END) as ot_minutes")
@@ -99,7 +99,7 @@ class VehicleMonthlyLog extends Model
 
         if ($driverTotals->isEmpty()) {
             $driverTotals = collect([(object)[
-                'driver_name' => 'Driver 1',
+                'driver_name' => 'Rohit',
                 'ot_minutes' => (int)$this->total_ot_minutes,
             ]]);
         }
@@ -115,7 +115,7 @@ class VehicleMonthlyLog extends Model
             $payableFixedPayment = ($fixedPayment / $totalDays) * $presentDays;
 
             $this->driverPayments()->updateOrCreate(
-                ['driver_name' => $driverTotal->driver_name ?: 'Driver 1'],
+                ['driver_name' => $driverTotal->driver_name ?: 'Rohit'],
                 [
                     'fixed_payment' => round($payableFixedPayment, 2),
                     'ot_minutes' => $otMinutes,

@@ -44,7 +44,7 @@
                                 </td>
                                 <td>{{ $entry->day }}</td>
                                 <td>
-                                    <input type="text" name="entries[{{ $index }}][driver_name]" value="{{ $entry->driver_name ?: 'Driver 1' }}" class="form-control form-control-sm" list="driverNames">
+                                    <input type="text" name="entries[{{ $index }}][driver_name]" value="{{ $entry->driver_name ?: 'Rohit' }}" class="form-control form-control-sm" list="driverNames">
                                 </td>
                                 <td>
                                     <select name="entries[{{ $index }}][attendance_status]" class="form-select form-select-sm">
@@ -62,7 +62,7 @@
             </div>
 
             <datalist id="driverNames">
-                <option value="Driver 1">
+                <option value="Rohit">
                 <option value="Driver 2">
             </datalist>
 
@@ -74,7 +74,7 @@
         @if($vehicle_log->driverPayments->isNotEmpty())
             @php
                 $attendanceSummary = $vehicle_log->dailyEntries
-                    ->groupBy(fn ($entry) => $entry->driver_name ?: 'Driver 1')
+                    ->groupBy(fn ($entry) => $entry->driver_name ?: 'Rohit')
                     ->map(fn ($entries) => [
                         'present' => $entries->filter(fn ($entry) => ($entry->attendance_status ?: 'present') === 'present')->count(),
                         'absent' => $entries->where('attendance_status', 'absent')->count(),

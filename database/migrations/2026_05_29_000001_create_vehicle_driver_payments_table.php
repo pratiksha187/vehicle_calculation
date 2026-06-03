@@ -11,7 +11,7 @@ return new class extends Migration {
         Schema::create('vehicle_driver_payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vehicle_monthly_log_id')->constrained()->cascadeOnDelete();
-            $table->string('driver_name')->default('Driver 1');
+            $table->string('driver_name')->default('Rohit');
             $table->decimal('fixed_payment', 12, 2)->default(20000);
             $table->integer('ot_minutes')->default(0);
             $table->decimal('ot_hours', 12, 2)->default(0);
@@ -33,7 +33,7 @@ return new class extends Migration {
 
                 if ($entries->isEmpty()) {
                     $entries = collect([(object)[
-                        'driver_name' => 'Driver 1',
+                        'driver_name' => 'Rohit',
                         'ot_minutes' => (int)$log->total_ot_minutes,
                     ]]);
                 }
@@ -44,7 +44,7 @@ return new class extends Migration {
 
                     DB::table('vehicle_driver_payments')->insert([
                         'vehicle_monthly_log_id' => $log->id,
-                        'driver_name' => $entry->driver_name ?: 'Driver 1',
+                        'driver_name' => $entry->driver_name ?: 'Rohit',
                         'fixed_payment' => 20000,
                         'ot_minutes' => (int)$entry->ot_minutes,
                         'ot_hours' => round($otHours, 2),

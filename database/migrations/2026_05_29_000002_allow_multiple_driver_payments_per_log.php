@@ -10,7 +10,7 @@ return new class extends Migration {
     {
         if (!Schema::hasColumn('vehicle_driver_payments', 'driver_name')) {
             Schema::table('vehicle_driver_payments', function (Blueprint $table) {
-                $table->string('driver_name')->default('Driver 1')->after('vehicle_monthly_log_id');
+                $table->string('driver_name')->default('Rohit')->after('vehicle_monthly_log_id');
             });
         }
 
@@ -35,7 +35,7 @@ return new class extends Migration {
         DB::table('vehicle_driver_payments')
             ->whereNull('driver_name')
             ->orWhere('driver_name', '')
-            ->update(['driver_name' => 'Driver 1']);
+            ->update(['driver_name' => 'Rohit']);
     }
 
     public function down(): void

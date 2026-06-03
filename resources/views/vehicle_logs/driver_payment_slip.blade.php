@@ -4,7 +4,7 @@
 @php
     $driverPayments = $vehicle_log->driverPayments;
     $attendanceSummary = $vehicle_log->dailyEntries
-        ->groupBy(fn ($entry) => $entry->driver_name ?: 'Driver 1')
+        ->groupBy(fn ($entry) => $entry->driver_name ?: 'Rohit')
         ->map(fn ($entries) => [
             'present' => $entries->filter(fn ($entry) => ($entry->attendance_status ?: 'present') === 'present')->count(),
             'absent' => $entries->where('attendance_status', 'absent')->count(),

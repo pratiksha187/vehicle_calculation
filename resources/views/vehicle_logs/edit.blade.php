@@ -37,7 +37,7 @@
                                     <input type="hidden" name="entries[{{ $index }}][attendance_status]" value="{{ $entry->attendance_status ?: 'present' }}">
                                 </td>
                                 <td>{{ $entry->day }}</td>
-                                <td><input type="text" name="entries[{{ $index }}][driver_name]" value="{{ $entry->driver_name ?: 'Driver 1' }}" class="form-control form-control-sm" list="driverNames"></td>
+                                <td><input type="text" name="entries[{{ $index }}][driver_name]" value="{{ $entry->driver_name ?: 'Rohit' }}" class="form-control form-control-sm" list="driverNames"></td>
                                 <td><input type="text" name="entries[{{ $index }}][challan_no]" value="{{ $entry->challan_no }}" class="form-control form-control-sm"></td>
                                 <td><input type="number" step="0.01" name="entries[{{ $index }}][diesel_added]" value="{{ $entry->diesel_added }}" class="form-control form-control-sm"></td>
                                 <td><input type="number" name="entries[{{ $index }}][start_reading]" value="{{ $entry->start_reading }}" class="form-control form-control-sm"></td>
@@ -52,7 +52,7 @@
             </div>
 
             <datalist id="driverNames">
-                <option value="Driver 1">
+                <option value="Rohit">
                 <option value="Driver 2">
             </datalist>
 
