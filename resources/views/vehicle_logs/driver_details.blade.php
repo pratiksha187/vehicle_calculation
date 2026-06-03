@@ -16,7 +16,7 @@
         </div>
 
         <div class="alert alert-info py-2">
-            Add driver name and Present / Absent here. Fixed driver payment is Rs. 20,000 and OT is calculated automatically.
+            Add driver name and Present / Absent here. Fixed driver payment is Rs. 20,000 and driver OT is Rs. 50/hour.
         </div>
 
         <form action="{{ route('vehicle-logs.save-driver-details', $vehicle_log->id) }}" method="POST">
@@ -72,14 +72,27 @@
         </form>
 
         @if($vehicle_log->driverPayments->isNotEmpty())
+            @php
+                $attendanceSummary = $vehicle_log->dailyEntries
+                    ->groupBy(fn ($entry) => $entry->driver_name ?: 'Driver 1')
+                    ->map(fn ($entries) => [
+                        'present' => $entries->filter(fn ($entry) => ($entry->attendance_status ?: 'present') === 'present')->count(),
+                        'absent' => $entries->where('attendance_status', 'absent')->count(),
+                    ]);
+            @endphp
+
             <div class="table-responsive mt-4">
                 <table class="table table-bordered table-sm">
                     <thead class="table-secondary">
                         <tr>
                             <th>Driver</th>
+                            <th>Present Days</th>
+                            <th>Absent Days</th>
                             <th>Fixed Payment</th>
                             <th>OT Hrs</th>
+                            <th>Driver OT Rate</th>
                             <th>OT Amount</th>
+                            <th>Calculation</th>
                             <th>Total Payment</th>
                         </tr>
                     </thead>
@@ -87,9 +100,13 @@
                         @foreach($vehicle_log->driverPayments as $payment)
                             <tr>
                                 <td>{{ $payment->driver_name }}</td>
+                                <td>{{ $attendanceSummary[$payment->driver_name]['present'] ?? 0 }}</td>
+                                <td>{{ $attendanceSummary[$payment->driver_name]['absent'] ?? 0 }}</td>
                                 <td>{{ number_format($payment->fixed_payment, 2) }}</td>
                                 <td>{{ $payment->formatted_ot }}</td>
+                                <td>{{ number_format($payment->ot_rate_per_hour, 2) }}</td>
                                 <td>{{ number_format($payment->ot_amount, 2) }}</td>
+                                <td>20,000 + ({{ number_format($payment->ot_hours, 2) }} x {{ number_format($payment->ot_rate_per_hour, 2) }})</td>
                                 <td><strong>{{ number_format($payment->total_payment, 2) }}</strong></td>
                             </tr>
                         @endforeach

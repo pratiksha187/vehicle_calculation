@@ -79,7 +79,7 @@
                 <table class="table table-bordered">
                     <tr><th>Fixed Monthly Amount</th><td>{{ number_format($vehicle_log->fixed_monthly_amount, 2) }}</td></tr>
                     <tr><th>OT Hrs</th><td>{{ $vehicle_log->formatted_ot }}</td></tr>
-                    <tr><th>OT Rate</th><td>{{ number_format($vehicle_log->vehicle->ot_rate_per_hour, 2) }}</td></tr>
+                    <tr><th>Company OT Rate</th><td>{{ number_format(\App\Models\Vehicle::DEFAULT_COMPANY_OT_RATE_PER_HOUR, 2) }}</td></tr>
                     <tr><th>Total OT Amount</th><td>{{ number_format($vehicle_log->total_ot_amount, 2) }}</td></tr>
                     <tr><th>Extra KM Rate</th><td>{{ number_format($vehicle_log->extra_km_rate, 2) }}</td></tr>
                     <tr><th>Extra KM Amount</th><td>{{ number_format($vehicle_log->extra_km_amount, 2) }}</td></tr>

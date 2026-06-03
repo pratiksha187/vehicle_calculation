@@ -10,7 +10,7 @@ class VehicleDriverPayment extends Model
     public const DEFAULT_OT_CALCULATION_AMOUNT = 18000;
     public const DEFAULT_OT_DAYS_PER_MONTH = 30;
     public const DEFAULT_OT_HOURS_PER_DAY = 12;
-    public const DEFAULT_OT_RATE_PER_HOUR = self::DEFAULT_OT_CALCULATION_AMOUNT / self::DEFAULT_OT_DAYS_PER_MONTH / self::DEFAULT_OT_HOURS_PER_DAY;
+    public const DEFAULT_OT_RATE_PER_HOUR = 50;
 
     protected $fillable = [
         'vehicle_monthly_log_id',

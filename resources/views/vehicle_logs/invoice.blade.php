@@ -343,6 +343,7 @@ $amountInWords = numberToWordsIndian($roundedNetPayable);
                             <br><br>
                             Fixed Amount: ₹ {{ number_format($vehicle_log->fixed_monthly_amount, 2) }}<br>
                             OT Hours: {{ $vehicle_log->formatted_ot }}<br>
+                            Company OT Rate: Rs. {{ number_format(\App\Models\Vehicle::DEFAULT_COMPANY_OT_RATE_PER_HOUR, 2) }} / hour<br>
                             OT Amount: ₹ {{ number_format($vehicle_log->total_ot_amount, 2) }}<br>
                             Total KM: {{ $vehicle_log->total_km }}<br>
                             KM Limit: {{ $vehicle_log->km_limit }}<br>

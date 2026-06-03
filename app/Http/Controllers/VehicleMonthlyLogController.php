@@ -358,7 +358,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
         $readingDiff = ($closing >= $opening) ? ($closing - $opening) : 0;
         $average = $dieselTotal > 0 ? ($readingDiff / $dieselTotal) : 0;
         $totalOtHours = $totalOtMinutes / 60;
-        $totalOtAmount = $totalOtHours * (float)$vehicle_log->vehicle->ot_rate_per_hour;
+        $totalOtAmount = $totalOtHours * Vehicle::DEFAULT_COMPANY_OT_RATE_PER_HOUR;
         $kmLimit = (int)($vehicle_log->km_limit ?? Vehicle::DEFAULT_KM_LIMIT);
         $extraKmRate = (float)($vehicle_log->extra_km_rate ?? Vehicle::DEFAULT_EXTRA_KM_RATE);
         $extraKm = max(0, $readingDiff - $kmLimit);

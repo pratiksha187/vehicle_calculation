@@ -31,7 +31,7 @@
 
     <div class="col-md-4">
         <label class="form-label">OT Rate Per Hour</label>
-        <input type="number" step="0.01" name="ot_rate_per_hour" class="form-control" value="{{ old('ot_rate_per_hour', $vehicle->ot_rate_per_hour ?? 55.56) }}">
+        <input type="number" step="0.01" name="ot_rate_per_hour" class="form-control" value="{{ old('ot_rate_per_hour', $vehicle->ot_rate_per_hour ?? \App\Models\Vehicle::DEFAULT_COMPANY_OT_RATE_PER_HOUR) }}">
     </div>
 
     <div class="col-md-4">

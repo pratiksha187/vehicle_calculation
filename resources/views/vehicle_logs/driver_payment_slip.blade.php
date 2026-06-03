@@ -6,7 +6,7 @@
     $attendanceSummary = $vehicle_log->dailyEntries
         ->groupBy(fn ($entry) => $entry->driver_name ?: 'Driver 1')
         ->map(fn ($entries) => [
-            'present' => $entries->where('attendance_status', 'present')->count(),
+            'present' => $entries->filter(fn ($entry) => ($entry->attendance_status ?: 'present') === 'present')->count(),
             'absent' => $entries->where('attendance_status', 'absent')->count(),
         ]);
 @endphp
@@ -148,6 +148,12 @@
                     <tr>
                         <th>Total Driver Payment</th>
                         <td class="right"><strong>Rs. {{ number_format($driverPayment->total_payment, 2) }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th>Calculation</th>
+                        <td class="right">
+                            Rs. 20,000 + ({{ number_format($driverPayment->ot_hours, 2) }} x Rs. {{ number_format($driverPayment->ot_rate_per_hour, 2) }})
+                        </td>
                     </tr>
                 </table>
             @empty
