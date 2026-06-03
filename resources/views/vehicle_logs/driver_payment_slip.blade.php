@@ -149,12 +149,7 @@
                         <th>Total Driver Payment</th>
                         <td class="right"><strong>Rs. {{ number_format($driverPayment->total_payment, 2) }}</strong></td>
                     </tr>
-                    <tr>
-                        <th>Calculation</th>
-                        <td class="right">
-                            Rs. {{ number_format($driverPayment->fixed_payment, 2) }} + ({{ $driverPayment->formatted_ot }} = {{ number_format($driverPayment->ot_hours, 2) }} hrs x Rs. {{ number_format($driverPayment->ot_rate_per_hour, 2) }})
-                        </td>
-                    </tr>
+                  
                 </table>
             @empty
                 <table class="driver-slip-table">
