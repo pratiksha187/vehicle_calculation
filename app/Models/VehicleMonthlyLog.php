@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Model;
 
 class VehicleMonthlyLog extends Model
@@ -87,12 +88,13 @@ class VehicleMonthlyLog extends Model
     {
         $fixedPayment = VehicleDriverPayment::DEFAULT_FIXED_PAYMENT;
         $otRate = VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR;
-        $totalDays = max(1, $this->dailyEntries()->count());
+        $salaryWorkingDays = max(1, $this->salaryWorkingDays());
+        $perDayPayment = $fixedPayment / $salaryWorkingDays;
         $driverTotals = $this->dailyEntries()
             ->reorder()
             ->selectRaw("COALESCE(NULLIF(driver_name, ''), 'Rohit') as driver_name")
-            ->selectRaw("SUM(CASE WHEN attendance_status IS NULL OR attendance_status = 'present' THEN 1 ELSE 0 END) as present_days")
-            ->selectRaw("SUM(CASE WHEN attendance_status = 'absent' THEN 1 ELSE 0 END) as absent_days")
+            ->selectRaw("SUM(CASE WHEN (attendance_status IS NULL OR attendance_status = 'present') AND DAYOFWEEK(entry_date) <> 1 THEN 1 ELSE 0 END) as present_days")
+            ->selectRaw("SUM(CASE WHEN attendance_status = 'absent' AND DAYOFWEEK(entry_date) <> 1 THEN 1 ELSE 0 END) as absent_days")
             ->selectRaw("SUM(CASE WHEN attendance_status IS NULL OR attendance_status = 'present' THEN ot_minutes ELSE 0 END) as ot_minutes")
             ->groupBy('driver_name')
             ->get();
@@ -112,7 +114,7 @@ class VehicleMonthlyLog extends Model
             $otMinutes = (int)$driverTotal->ot_minutes;
             $otHours = $otMinutes / 60;
             $otAmount = $otHours * $otRate;
-            $payableFixedPayment = ($fixedPayment / $totalDays) * $presentDays;
+            $payableFixedPayment = $perDayPayment * $presentDays;
             $roundedFixedPayment = round($payableFixedPayment, 2);
             $roundedOtAmount = round($otAmount, 2);
 
@@ -128,6 +130,22 @@ class VehicleMonthlyLog extends Model
                 ]
             );
         }
+    }
+
+    public function salaryWorkingDays(): int
+    {
+        $fromDate = $this->from_date;
+        $toDate = $this->to_date;
+
+        if (!$fromDate || !$toDate) {
+            return $this->dailyEntries()
+                ->whereRaw('DAYOFWEEK(entry_date) <> 1')
+                ->count();
+        }
+
+        return collect(CarbonPeriod::create($fromDate, $toDate))
+            ->reject(fn ($date) => $date->isSunday())
+            ->count();
     }
 
     public static function formatMinutes($minutes)
