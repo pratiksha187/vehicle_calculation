@@ -90,8 +90,8 @@ class VehicleMonthlyLog extends Model
         $driverTotals = $this->dailyEntries()
             ->reorder()
             ->selectRaw("COALESCE(NULLIF(driver_name, ''), 'Rohit') as driver_name")
-            ->selectRaw("SUM(CASE WHEN (attendance_status IS NULL OR attendance_status = 'present') AND DAYOFWEEK(entry_date) <> 1 THEN 1 ELSE 0 END) as present_days")
-            ->selectRaw("SUM(CASE WHEN attendance_status = 'absent' AND DAYOFWEEK(entry_date) <> 1 THEN 1 ELSE 0 END) as absent_days")
+            ->selectRaw("SUM(CASE WHEN attendance_status IS NULL OR attendance_status = 'present' THEN 1 ELSE 0 END) as present_days")
+            ->selectRaw("SUM(CASE WHEN attendance_status = 'absent' THEN 1 ELSE 0 END) as absent_days")
             ->selectRaw("SUM(CASE WHEN attendance_status IS NULL OR attendance_status = 'present' THEN ot_minutes ELSE 0 END) as ot_minutes")
             ->groupBy('driver_name')
             ->get();
@@ -149,14 +149,10 @@ class VehicleMonthlyLog extends Model
         $toDate = $this->to_date;
 
         if (!$fromDate || !$toDate) {
-            return $this->dailyEntries()
-                ->whereRaw('DAYOFWEEK(entry_date) <> 1')
-                ->count();
+            return $this->dailyEntries()->count();
         }
 
-        return collect(CarbonPeriod::create($fromDate, $toDate))
-            ->reject(fn ($date) => $date->isSunday())
-            ->count();
+        return collect(CarbonPeriod::create($fromDate, $toDate))->count();
     }
 
     public static function formatMinutes($minutes)

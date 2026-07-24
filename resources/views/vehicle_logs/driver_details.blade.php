@@ -113,14 +113,14 @@
                 $attendanceSummary = $vehicle_log->dailyEntries
                     ->groupBy(fn ($entry) => $entry->driver_name ?: 'Rohit')
                     ->map(fn ($entries) => [
-                        'present' => $entries->filter(fn ($entry) => !$entry->entry_date->isSunday() && ($entry->attendance_status ?: 'present') === 'present')->count(),
-                        'absent' => $entries->filter(fn ($entry) => !$entry->entry_date->isSunday() && $entry->attendance_status === 'absent')->count(),
+                        'present' => $entries->filter(fn ($entry) => ($entry->attendance_status ?: 'present') === 'present')->count(),
+                        'absent' => $entries->filter(fn ($entry) => $entry->attendance_status === 'absent')->count(),
                     ]);
                 $salaryWorkingDays = $vehicle_log->salaryWorkingDays();
             @endphp
 
             <div class="alert alert-secondary py-2 mt-4">
-                Salary working days: {{ $salaryWorkingDays }}. Sundays are fully paid and excluded from the salary day divisor.
+                Salary days: {{ $salaryWorkingDays }}. Sundays are included; mark Sunday Absent to cut that day's payment.
             </div>
 
             <div class="table-responsive mt-4">

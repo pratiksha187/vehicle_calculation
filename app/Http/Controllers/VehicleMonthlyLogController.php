@@ -392,6 +392,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
             if (!$payment) {
                 continue;
             }
+            
 
             $monthlyPayment = round((float)($row['monthly_payment'] ?? $payment->monthly_payment ?? VehicleDriverPayment::DEFAULT_FIXED_PAYMENT), 2);
             $otRatePerHour = round((float)($row['ot_rate_per_hour'] ?? $payment->ot_rate_per_hour ?? VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR), 2);
@@ -400,7 +401,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
             $payment->update([
                 'monthly_payment' => $monthlyPayment,
                 'ot_rate_per_hour' => $otRatePerHour,
-                'advance_payment' => $advancePayment,
+               'advance_payment' => $advancePayment,
                 'net_payment' => round((float)$payment->total_payment - $advancePayment, 2),
             ]);
         }

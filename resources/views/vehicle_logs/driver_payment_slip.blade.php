@@ -6,8 +6,8 @@
     $attendanceSummary = $vehicle_log->dailyEntries
         ->groupBy(fn ($entry) => $entry->driver_name ?: 'Rohit')
         ->map(fn ($entries) => [
-            'present' => $entries->filter(fn ($entry) => !$entry->entry_date->isSunday() && ($entry->attendance_status ?: 'present') === 'present')->count(),
-            'absent' => $entries->filter(fn ($entry) => !$entry->entry_date->isSunday() && $entry->attendance_status === 'absent')->count(),
+            'present' => $entries->filter(fn ($entry) => ($entry->attendance_status ?: 'present') === 'present')->count(),
+            'absent' => $entries->filter(fn ($entry) => $entry->attendance_status === 'absent')->count(),
         ]);
     $salaryWorkingDays = $vehicle_log->salaryWorkingDays();
 @endphp
@@ -115,7 +115,7 @@
                     <td>{{ $vehicle_log->from_date->format('d-m-Y') }} to {{ $vehicle_log->to_date->format('d-m-Y') }}</td>
                 </tr>
                 <tr>
-                    <th>Salary Working Days</th>
+                    <th>Salary Days</th>
                     <td>{{ $salaryWorkingDays }} days</td>
                 </tr>
             </table>
