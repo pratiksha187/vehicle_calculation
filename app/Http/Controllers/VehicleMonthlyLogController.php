@@ -92,9 +92,12 @@ class VehicleMonthlyLogController extends Controller
 
             $vehicle_log->driverPayment()->create([
                 'driver_name' => 'Rohit',
+                'monthly_payment' => VehicleDriverPayment::DEFAULT_FIXED_PAYMENT,
                 'fixed_payment' => VehicleDriverPayment::DEFAULT_FIXED_PAYMENT,
                 'ot_rate_per_hour' => VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR,
+                'advance_payment' => 0,
                 'total_payment' => VehicleDriverPayment::DEFAULT_FIXED_PAYMENT,
+                'net_payment' => VehicleDriverPayment::DEFAULT_FIXED_PAYMENT,
             ]);
         });
 
@@ -217,7 +220,8 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
 
     public function driverDetails(VehicleMonthlyLog $vehicle_log)
     {
-        $vehicle_log->load(['vehicle', 'dailyEntries']);
+        $vehicle_log = $this->regenerateMonthlyLogForBilling($vehicle_log);
+
         return view('vehicle_logs.driver_details', compact('vehicle_log'));
     }
 
@@ -229,6 +233,9 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
             'entries.*.driver_name' => 'nullable|string|max:255',
             'entries.*.attendance_status' => 'required|in:present,absent',
             'entries.*.remark' => 'nullable|string',
+            'driver_payments' => 'nullable|array',
+            'driver_payments.*.monthly_payment' => 'nullable|numeric|min:0',
+            'driver_payments.*.advance_payment' => 'nullable|numeric|min:0',
         ]);
 
         DB::transaction(function () use ($request, $vehicle_log) {
@@ -246,6 +253,8 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
             }
 
             $this->recalculateMonthlyLog($vehicle_log);
+            $this->saveDriverPaymentAdjustments($request, $vehicle_log);
+            $vehicle_log->syncDriverPaymentFromSavedTotals();
         });
 
         return redirect()->route('vehicle-logs.driver-details', $vehicle_log->id)->with('success', 'Driver details and payment calculated successfully.');
@@ -372,6 +381,26 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
         $this->recalculateMonthlyLog($vehicle_log);
 
         return $vehicle_log->refresh()->load(['vehicle', 'dailyEntries', 'driverPayments']);
+    }
+
+    private function saveDriverPaymentAdjustments(Request $request, VehicleMonthlyLog $vehicle_log): void
+    {
+        foreach ($request->input('driver_payments', []) as $paymentId => $row) {
+            $payment = $vehicle_log->driverPayments()->whereKey($paymentId)->first();
+
+            if (!$payment) {
+                continue;
+            }
+
+            $monthlyPayment = round((float)($row['monthly_payment'] ?? $payment->monthly_payment ?? VehicleDriverPayment::DEFAULT_FIXED_PAYMENT), 2);
+            $advancePayment = round((float)($row['advance_payment'] ?? 0), 2);
+
+            $payment->update([
+                'monthly_payment' => $monthlyPayment,
+                'advance_payment' => $advancePayment,
+                'net_payment' => round((float)$payment->total_payment - $advancePayment, 2),
+            ]);
+        }
     }
 
     private function calculateMinutes(?string $inTime, ?string $outTime): array

@@ -86,10 +86,8 @@ class VehicleMonthlyLog extends Model
 
     public function syncDriverPaymentFromSavedTotals(): void
     {
-        $fixedPayment = VehicleDriverPayment::DEFAULT_FIXED_PAYMENT;
         $otRate = VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR;
         $salaryWorkingDays = max(1, $this->salaryWorkingDays());
-        $perDayPayment = $fixedPayment / $salaryWorkingDays;
         $driverTotals = $this->dailyEntries()
             ->reorder()
             ->selectRaw("COALESCE(NULLIF(driver_name, ''), 'Rohit') as driver_name")
@@ -102,6 +100,8 @@ class VehicleMonthlyLog extends Model
         if ($driverTotals->isEmpty()) {
             $driverTotals = collect([(object)[
                 'driver_name' => 'Rohit',
+                'present_days' => $salaryWorkingDays,
+                'absent_days' => 0,
                 'ot_minutes' => (int)$this->total_ot_minutes,
             ]]);
         }
@@ -110,23 +110,35 @@ class VehicleMonthlyLog extends Model
         $this->driverPayments()->whereNotIn('driver_name', $driverNames)->delete();
 
         foreach ($driverTotals as $driverTotal) {
+            $driverName = $driverTotal->driver_name ?: 'Rohit';
             $presentDays = (int)$driverTotal->present_days;
             $otMinutes = (int)$driverTotal->ot_minutes;
             $otHours = $otMinutes / 60;
             $otAmount = $otHours * $otRate;
+            $monthlyPayment = (float)(optional($this->driverPayments()
+                ->where('driver_name', $driverName)
+                ->first())->monthly_payment ?? VehicleDriverPayment::DEFAULT_FIXED_PAYMENT);
+            $perDayPayment = $monthlyPayment / $salaryWorkingDays;
             $payableFixedPayment = $perDayPayment * $presentDays;
             $roundedFixedPayment = round($payableFixedPayment, 2);
             $roundedOtAmount = round($otAmount, 2);
+            $advancePayment = (float)optional($this->driverPayments()
+                ->where('driver_name', $driverName)
+                ->first())->advance_payment;
+            $totalPayment = round($roundedFixedPayment + $roundedOtAmount, 2);
 
             $this->driverPayments()->updateOrCreate(
-                ['driver_name' => $driverTotal->driver_name ?: 'Rohit'],
+                ['driver_name' => $driverName],
                 [
+                    'monthly_payment' => round($monthlyPayment, 2),
                     'fixed_payment' => $roundedFixedPayment,
                     'ot_minutes' => $otMinutes,
                     'ot_hours' => round($otHours, 2),
                     'ot_rate_per_hour' => $otRate,
                     'ot_amount' => $roundedOtAmount,
-                    'total_payment' => round($roundedFixedPayment + $roundedOtAmount, 2),
+                    'advance_payment' => round($advancePayment, 2),
+                    'total_payment' => $totalPayment,
+                    'net_payment' => round($totalPayment - $advancePayment, 2),
                 ]
             );
         }

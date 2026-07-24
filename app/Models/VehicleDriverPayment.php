@@ -15,12 +15,15 @@ class VehicleDriverPayment extends Model
     protected $fillable = [
         'vehicle_monthly_log_id',
         'driver_name',
+        'monthly_payment',
         'fixed_payment',
         'ot_minutes',
         'ot_hours',
         'ot_rate_per_hour',
         'ot_amount',
+        'advance_payment',
         'total_payment',
+        'net_payment',
     ];
 
     public function monthlyLog()

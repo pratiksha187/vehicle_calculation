@@ -135,6 +135,10 @@
                         <td class="right">{{ $attendanceSummary[$driverPayment->driver_name]['absent'] ?? 0 }}</td>
                     </tr>
                     <tr>
+                        <th>Monthly Payment</th>
+                        <td class="right">Rs. {{ number_format($driverPayment->monthly_payment, 2) }}</td>
+                    </tr>
+                    <tr>
                         <th>Present Day Payment</th>
                         <td class="right">Rs. {{ number_format($driverPayment->fixed_payment, 2) }}</td>
                     </tr>
@@ -151,8 +155,16 @@
                         <td class="right">Rs. {{ number_format($driverPayment->ot_amount, 2) }}</td>
                     </tr>
                     <tr>
-                        <th>Total Driver Payment</th>
+                        <th>Total Driver Payment Before Advance</th>
                         <td class="right"><strong>Rs. {{ number_format($driverPayment->total_payment, 2) }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th>Advance Payment</th>
+                        <td class="right">Rs. {{ number_format($driverPayment->advance_payment, 2) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Net Driver Payment</th>
+                        <td class="right"><strong>Rs. {{ number_format($driverPayment->net_payment, 2) }}</strong></td>
                     </tr>
                   
                 </table>
@@ -167,8 +179,16 @@
 
             <table class="driver-slip-table">
                 <tr>
-                    <th>Grand Total Driver Payment</th>
+                    <th>Grand Total Driver Payment Before Advance</th>
                     <td class="right"><strong>Rs. {{ number_format($driverPayments->sum('total_payment') ?: 20000, 2) }}</strong></td>
+                </tr>
+                <tr>
+                    <th>Grand Total Advance Payment</th>
+                    <td class="right"><strong>Rs. {{ number_format($driverPayments->sum('advance_payment'), 2) }}</strong></td>
+                </tr>
+                <tr>
+                    <th>Grand Total Net Driver Payment</th>
+                    <td class="right"><strong>Rs. {{ number_format($driverPayments->sum('net_payment') ?: 20000, 2) }}</strong></td>
                 </tr>
             </table>
 

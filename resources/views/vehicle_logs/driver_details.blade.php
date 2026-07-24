@@ -66,6 +66,39 @@
                 <option value="Driver 2">
             </datalist>
 
+            @if($vehicle_log->driverPayments->isNotEmpty())
+                <div class="table-responsive mt-4">
+                    <table class="table table-bordered table-sm">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Driver</th>
+                                <th>Monthly Payment</th>
+                                <th>Present Day Payment</th>
+                                <th>Total Payment</th>
+                                <th>Advance Payment</th>
+                                <th>Net Payment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($vehicle_log->driverPayments as $payment)
+                                <tr>
+                                    <td>{{ $payment->driver_name }}</td>
+                                    <td>
+                                        <input type="number" step="0.01" min="0" name="driver_payments[{{ $payment->id }}][monthly_payment]" value="{{ $payment->monthly_payment }}" class="form-control form-control-sm">
+                                    </td>
+                                    <td>{{ number_format($payment->fixed_payment, 2) }}</td>
+                                    <td>{{ number_format($payment->total_payment, 2) }}</td>
+                                    <td>
+                                        <input type="number" step="0.01" min="0" name="driver_payments[{{ $payment->id }}][advance_payment]" value="{{ $payment->advance_payment }}" class="form-control form-control-sm">
+                                    </td>
+                                    <td><strong>{{ number_format($payment->net_payment, 2) }}</strong></td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+
             <button class="btn btn-success mt-3">Save Driver Details</button>
             <a href="{{ route('vehicle-logs.daily-entry', $vehicle_log->id) }}" class="btn btn-primary mt-3">Daily Entry</a>
             <a href="{{ route('vehicle-logs.driver-payment-slip', $vehicle_log->id) }}" class="btn btn-dark mt-3">Driver Payment</a>
@@ -93,12 +126,15 @@
                             <th>Driver</th>
                             <th>Present Days</th>
                             <th>Absent Days</th>
+                            <th>Monthly Payment</th>
                             <th>Present Day Payment</th>
                             <th>OT Hrs</th>
                             <th>Driver OT Rate</th>
                             <th>OT Amount</th>
                             <th>Calculation</th>
                             <th>Total Payment</th>
+                            <th>Advance</th>
+                            <th>Net Payment</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -107,12 +143,15 @@
                                 <td>{{ $payment->driver_name }}</td>
                                 <td>{{ $attendanceSummary[$payment->driver_name]['present'] ?? 0 }}</td>
                                 <td>{{ $attendanceSummary[$payment->driver_name]['absent'] ?? 0 }}</td>
+                                <td>{{ number_format($payment->monthly_payment, 2) }}</td>
                                 <td>{{ number_format($payment->fixed_payment, 2) }}</td>
                                 <td>{{ $payment->formatted_ot }}</td>
                                 <td>{{ number_format($payment->ot_rate_per_hour, 2) }}</td>
                                 <td>{{ number_format($payment->ot_amount, 2) }}</td>
-                                <td>{{ number_format($payment->fixed_payment, 2) }} + ({{ $payment->formatted_ot }} = {{ number_format($payment->ot_hours, 2) }} hrs x {{ number_format($payment->ot_rate_per_hour, 2) }})</td>
+                                <td>{{ number_format($payment->monthly_payment, 2) }} / {{ $salaryWorkingDays }} days x {{ $attendanceSummary[$payment->driver_name]['present'] ?? 0 }} present = {{ number_format($payment->fixed_payment, 2) }} + ({{ $payment->formatted_ot }} = {{ number_format($payment->ot_hours, 2) }} hrs x {{ number_format($payment->ot_rate_per_hour, 2) }})</td>
                                 <td><strong>{{ number_format($payment->total_payment, 2) }}</strong></td>
+                                <td>{{ number_format($payment->advance_payment, 2) }}</td>
+                                <td><strong>{{ number_format($payment->net_payment, 2) }}</strong></td>
                             </tr>
                         @endforeach
                     </tbody>
