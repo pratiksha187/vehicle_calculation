@@ -73,6 +73,7 @@
                             <tr>
                                 <th>Driver</th>
                                 <th>Monthly Payment</th>
+                                <th>Extra Hrs Rate</th>
                                 <th>Present Day Payment</th>
                                 <th>Total Payment</th>
                                 <th>Advance Payment</th>
@@ -85,6 +86,9 @@
                                     <td>{{ $payment->driver_name }}</td>
                                     <td>
                                         <input type="number" step="0.01" min="0" name="driver_payments[{{ $payment->id }}][monthly_payment]" value="{{ $payment->monthly_payment }}" class="form-control form-control-sm">
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" min="0" name="driver_payments[{{ $payment->id }}][ot_rate_per_hour]" value="{{ $payment->ot_rate_per_hour }}" class="form-control form-control-sm">
                                     </td>
                                     <td>{{ number_format($payment->fixed_payment, 2) }}</td>
                                     <td>{{ number_format($payment->total_payment, 2) }}</td>

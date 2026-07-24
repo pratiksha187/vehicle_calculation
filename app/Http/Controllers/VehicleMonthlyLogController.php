@@ -235,6 +235,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
             'entries.*.remark' => 'nullable|string',
             'driver_payments' => 'nullable|array',
             'driver_payments.*.monthly_payment' => 'nullable|numeric|min:0',
+            'driver_payments.*.ot_rate_per_hour' => 'nullable|numeric|min:0',
             'driver_payments.*.advance_payment' => 'nullable|numeric|min:0',
         ]);
 
@@ -393,10 +394,12 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
             }
 
             $monthlyPayment = round((float)($row['monthly_payment'] ?? $payment->monthly_payment ?? VehicleDriverPayment::DEFAULT_FIXED_PAYMENT), 2);
+            $otRatePerHour = round((float)($row['ot_rate_per_hour'] ?? $payment->ot_rate_per_hour ?? VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR), 2);
             $advancePayment = round((float)($row['advance_payment'] ?? 0), 2);
 
             $payment->update([
                 'monthly_payment' => $monthlyPayment,
+                'ot_rate_per_hour' => $otRatePerHour,
                 'advance_payment' => $advancePayment,
                 'net_payment' => round((float)$payment->total_payment - $advancePayment, 2),
             ]);

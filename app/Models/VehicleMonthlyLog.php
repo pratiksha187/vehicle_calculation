@@ -86,7 +86,6 @@ class VehicleMonthlyLog extends Model
 
     public function syncDriverPaymentFromSavedTotals(): void
     {
-        $otRate = VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR;
         $salaryWorkingDays = max(1, $this->salaryWorkingDays());
         $driverTotals = $this->dailyEntries()
             ->reorder()
@@ -111,20 +110,20 @@ class VehicleMonthlyLog extends Model
 
         foreach ($driverTotals as $driverTotal) {
             $driverName = $driverTotal->driver_name ?: 'Rohit';
+            $existingPayment = $this->driverPayments()
+                ->where('driver_name', $driverName)
+                ->first();
             $presentDays = (int)$driverTotal->present_days;
             $otMinutes = (int)$driverTotal->ot_minutes;
             $otHours = $otMinutes / 60;
+            $otRate = (float)($existingPayment->ot_rate_per_hour ?? VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR);
             $otAmount = $otHours * $otRate;
-            $monthlyPayment = (float)(optional($this->driverPayments()
-                ->where('driver_name', $driverName)
-                ->first())->monthly_payment ?? VehicleDriverPayment::DEFAULT_FIXED_PAYMENT);
+            $monthlyPayment = (float)($existingPayment->monthly_payment ?? VehicleDriverPayment::DEFAULT_FIXED_PAYMENT);
             $perDayPayment = $monthlyPayment / $salaryWorkingDays;
             $payableFixedPayment = $perDayPayment * $presentDays;
             $roundedFixedPayment = round($payableFixedPayment, 2);
             $roundedOtAmount = round($otAmount, 2);
-            $advancePayment = (float)optional($this->driverPayments()
-                ->where('driver_name', $driverName)
-                ->first())->advance_payment;
+            $advancePayment = (float)($existingPayment->advance_payment ?? 0);
             $totalPayment = round($roundedFixedPayment + $roundedOtAmount, 2);
 
             $this->driverPayments()->updateOrCreate(
