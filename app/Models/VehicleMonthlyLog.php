@@ -123,7 +123,9 @@ class VehicleMonthlyLog extends Model
             $payableFixedPayment = $perDayPayment * $presentDays;
             $roundedFixedPayment = round($payableFixedPayment, 2);
             $roundedOtAmount = round($otAmount, 2);
-            $advancePayment = (float)($existingPayment->advance_payment ?? 0);
+            $advancePayment = $existingPayment
+                ? (float)$existingPayment->advances()->sum('amount')
+                : 0;
             $totalPayment = round($roundedFixedPayment + $roundedOtAmount, 2);
 
             $this->driverPayments()->updateOrCreate(

@@ -37,6 +37,11 @@ class VehicleDriverPayment extends Model
         return $this->belongsTo(VehicleMonthlyLog::class, 'vehicle_monthly_log_id');
     }
 
+    public function advances()
+    {
+        return $this->hasMany(VehicleDriverPaymentAdvance::class)->orderBy('advance_date')->orderBy('id');
+    }
+
     public function getFormattedOtAttribute()
     {
         return VehicleMonthlyLog::formatMinutes($this->ot_minutes);

@@ -162,20 +162,33 @@
                         <th>Advance Payment</th>
                         <td class="right">Rs. {{ number_format($driverPayment->advance_payment, 2) }}</td>
                     </tr>
-                    <tr>
-                        <th>Advance Date</th>
-                        <td class="right">{{ $driverPayment->advance_date ? $driverPayment->advance_date->format('d-m-Y') : '-' }}</td>
-                    </tr>
-                    <tr>
-                        <th>Advance SS</th>
-                        <td class="right">
-                            @if($driverPayment->advance_screenshot)
-                                <a href="{{ asset('storage/' . $driverPayment->advance_screenshot) }}" target="_blank">View SS</a>
-                            @else
-                                -
-                            @endif
-                        </td>
-                    </tr>
+                    @if($driverPayment->advances->isNotEmpty())
+                        <tr>
+                            <th>Advance Details</th>
+                            <td>
+                                <table class="driver-slip-table" style="margin-bottom: 0;">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>SS</th>
+                                    </tr>
+                                    @foreach($driverPayment->advances as $advance)
+                                        <tr>
+                                            <td>{{ $advance->advance_date ? $advance->advance_date->format('d-m-Y') : '-' }}</td>
+                                            <td class="right">Rs. {{ number_format($advance->amount, 2) }}</td>
+                                            <td class="right">
+                                                @if($advance->screenshot)
+                                                    <a href="{{ asset('storage/' . $advance->screenshot) }}" target="_blank">View SS</a>
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </table>
+                            </td>
+                        </tr>
+                    @endif
                     <tr>
                         <th>Net Driver Payment</th>
                         <td class="right"><strong>Rs. {{ number_format($driverPayment->net_payment, 2) }}</strong></td>

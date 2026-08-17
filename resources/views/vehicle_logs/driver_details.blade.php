@@ -76,9 +76,7 @@
                                 <th>Extra Hrs Rate</th>
                                 <th>Present Day Payment</th>
                                 <th>Total Payment</th>
-                                <th>Advance Payment</th>
-                                <th>Advance Date</th>
-                                <th>Advance SS</th>
+                                <th>Advance Total</th>
                                 <th>Net Payment</th>
                             </tr>
                         </thead>
@@ -94,19 +92,64 @@
                                     </td>
                                     <td>{{ number_format($payment->fixed_payment, 2) }}</td>
                                     <td>{{ number_format($payment->total_payment, 2) }}</td>
-                                    <td>
-                                        <input type="number" step="0.01" min="0" name="driver_payments[{{ $payment->id }}][advance_payment]" value="{{ $payment->advance_payment }}" class="form-control form-control-sm">
-                                    </td>
-                                    <td>
-                                        <input type="date" name="driver_payments[{{ $payment->id }}][advance_date]" value="{{ optional($payment->advance_date)->format('Y-m-d') }}" class="form-control form-control-sm">
-                                    </td>
-                                    <td>
-                                        <input type="file" name="driver_payments[{{ $payment->id }}][advance_screenshot]" accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf" class="form-control form-control-sm">
-                                        @if($payment->advance_screenshot)
-                                            <a href="{{ asset('storage/' . $payment->advance_screenshot) }}" target="_blank" class="small">View SS</a>
-                                        @endif
-                                    </td>
+                                    <td>{{ number_format($payment->advance_payment, 2) }}</td>
                                     <td><strong>{{ number_format($payment->net_payment, 2) }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="7">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <strong>Advance Details</strong>
+                                            <button type="button" class="btn btn-sm btn-outline-primary add-advance-row" data-payment-id="{{ $payment->id }}">Add Advance</button>
+                                        </div>
+
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-sm mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Amount</th>
+                                                        <th>SS / Proof</th>
+                                                        <th>Remove</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="advanceRows{{ $payment->id }}">
+                                                    @forelse($payment->advances as $advanceIndex => $advance)
+                                                        <tr>
+                                                            <td>
+                                                                <input type="hidden" name="driver_payments[{{ $payment->id }}][advances][{{ $advanceIndex }}][id]" value="{{ $advance->id }}">
+                                                                <input type="date" name="driver_payments[{{ $payment->id }}][advances][{{ $advanceIndex }}][advance_date]" value="{{ optional($advance->advance_date)->format('Y-m-d') }}" class="form-control form-control-sm">
+                                                            </td>
+                                                            <td>
+                                                                <input type="number" step="0.01" min="0" name="driver_payments[{{ $payment->id }}][advances][{{ $advanceIndex }}][amount]" value="{{ $advance->amount }}" class="form-control form-control-sm">
+                                                            </td>
+                                                            <td>
+                                                                <input type="file" name="driver_payments[{{ $payment->id }}][advances][{{ $advanceIndex }}][screenshot]" accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf" class="form-control form-control-sm">
+                                                                @if($advance->screenshot)
+                                                                    <a href="{{ asset('storage/' . $advance->screenshot) }}" target="_blank" class="small">View SS</a>
+                                                                @endif
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <input type="checkbox" name="driver_payments[{{ $payment->id }}][advances][{{ $advanceIndex }}][remove]" value="1">
+                                                            </td>
+                                                        </tr>
+                                                    @empty
+                                                        <tr>
+                                                            <td>
+                                                                <input type="date" name="driver_payments[{{ $payment->id }}][advances][0][advance_date]" class="form-control form-control-sm">
+                                                            </td>
+                                                            <td>
+                                                                <input type="number" step="0.01" min="0" name="driver_payments[{{ $payment->id }}][advances][0][amount]" class="form-control form-control-sm">
+                                                            </td>
+                                                            <td>
+                                                                <input type="file" name="driver_payments[{{ $payment->id }}][advances][0][screenshot]" accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf" class="form-control form-control-sm">
+                                                            </td>
+                                                            <td></td>
+                                                        </tr>
+                                                    @endforelse
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -148,9 +191,7 @@
                             <th>OT Amount</th>
                             <th>Calculation</th>
                             <th>Total Payment</th>
-                            <th>Advance</th>
-                            <th>Advance Date</th>
-                            <th>Advance SS</th>
+                            <th>Advance Details</th>
                             <th>Net Payment</th>
                         </tr>
                     </thead>
@@ -167,13 +208,22 @@
                                 <td>{{ number_format($payment->ot_amount, 2) }}</td>
                                 <td>{{ number_format($payment->monthly_payment, 2) }} / {{ $salaryWorkingDays }} days x {{ $attendanceSummary[$payment->driver_name]['present'] ?? 0 }} present = {{ number_format($payment->fixed_payment, 2) }} + ({{ $payment->formatted_ot }} = {{ number_format($payment->ot_hours, 2) }} hrs x {{ number_format($payment->ot_rate_per_hour, 2) }})</td>
                                 <td><strong>{{ number_format($payment->total_payment, 2) }}</strong></td>
-                                <td>{{ number_format($payment->advance_payment, 2) }}</td>
-                                <td>{{ $payment->advance_date ? $payment->advance_date->format('d/m/Y') : '-' }}</td>
                                 <td>
-                                    @if($payment->advance_screenshot)
-                                        <a href="{{ asset('storage/' . $payment->advance_screenshot) }}" target="_blank">View SS</a>
+                                    <strong>{{ number_format($payment->advance_payment, 2) }}</strong>
+                                    @if($payment->advances->isNotEmpty())
+                                        <div class="small">
+                                            @foreach($payment->advances as $advance)
+                                                <div>
+                                                    {{ $advance->advance_date ? $advance->advance_date->format('d/m/Y') : '-' }}:
+                                                    {{ number_format($advance->amount, 2) }}
+                                                    @if($advance->screenshot)
+                                                        - <a href="{{ asset('storage/' . $advance->screenshot) }}" target="_blank">SS</a>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     @else
-                                        -
+                                        <div class="small">No advance details</div>
                                     @endif
                                 </td>
                                 <td><strong>{{ number_format($payment->net_payment, 2) }}</strong></td>
@@ -185,4 +235,33 @@
         @endif
     </div>
 </div>
+
+<script>
+    document.querySelectorAll('.add-advance-row').forEach((button) => {
+        button.addEventListener('click', () => {
+            const paymentId = button.dataset.paymentId;
+            const tbody = document.getElementById(`advanceRows${paymentId}`);
+            const index = tbody.querySelectorAll('tr').length;
+            const row = document.createElement('tr');
+
+            row.innerHTML = `
+                <td>
+                    <input type="date" name="driver_payments[${paymentId}][advances][${index}][advance_date]" class="form-control form-control-sm">
+                </td>
+                <td>
+                    <input type="number" step="0.01" min="0" name="driver_payments[${paymentId}][advances][${index}][amount]" class="form-control form-control-sm">
+                </td>
+                <td>
+                    <input type="file" name="driver_payments[${paymentId}][advances][${index}][screenshot]" accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf" class="form-control form-control-sm">
+                </td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-new-advance-row">Remove</button>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+            row.querySelector('.remove-new-advance-row').addEventListener('click', () => row.remove());
+        });
+    });
+</script>
 @endsection

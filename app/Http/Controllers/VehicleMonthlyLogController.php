@@ -237,9 +237,12 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
             'driver_payments' => 'nullable|array',
             'driver_payments.*.monthly_payment' => 'nullable|numeric|min:0',
             'driver_payments.*.ot_rate_per_hour' => 'nullable|numeric|min:0',
-            'driver_payments.*.advance_payment' => 'nullable|numeric|min:0',
-            'driver_payments.*.advance_date' => 'nullable|date',
-            'driver_payments.*.advance_screenshot' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
+            'driver_payments.*.advances' => 'nullable|array',
+            'driver_payments.*.advances.*.id' => 'nullable|exists:vehicle_driver_payment_advances,id',
+            'driver_payments.*.advances.*.amount' => 'nullable|numeric|min:0',
+            'driver_payments.*.advances.*.advance_date' => 'nullable|date',
+            'driver_payments.*.advances.*.remove' => 'nullable|boolean',
+            'driver_payments.*.advances.*.screenshot' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
         ]);
 
         DB::transaction(function () use ($request, $vehicle_log) {
@@ -384,7 +387,7 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
     {
         $this->recalculateMonthlyLog($vehicle_log);
 
-        return $vehicle_log->refresh()->load(['vehicle', 'dailyEntries', 'driverPayments']);
+        return $vehicle_log->refresh()->load(['vehicle', 'dailyEntries', 'driverPayments.advances']);
     }
 
     private function saveDriverPaymentAdjustments(Request $request, VehicleMonthlyLog $vehicle_log): void
@@ -399,27 +402,69 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
 
             $monthlyPayment = round((float)($row['monthly_payment'] ?? $payment->monthly_payment ?? VehicleDriverPayment::DEFAULT_FIXED_PAYMENT), 2);
             $otRatePerHour = round((float)($row['ot_rate_per_hour'] ?? $payment->ot_rate_per_hour ?? VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR), 2);
-            $advancePayment = round((float)($row['advance_payment'] ?? 0), 2);
-            $advanceScreenshot = $payment->advance_screenshot;
-            $uploadedScreenshot = $request->file("driver_payments.$paymentId.advance_screenshot");
-
-            if ($uploadedScreenshot) {
-                if ($advanceScreenshot) {
-                    Storage::disk('public')->delete($advanceScreenshot);
-                }
-
-                $advanceScreenshot = $uploadedScreenshot->store('driver-advance-screenshots', 'public');
-            }
+            $advancePayment = $this->saveDriverPaymentAdvances($request, $payment, $row['advances'] ?? []);
 
             $payment->update([
                 'monthly_payment' => $monthlyPayment,
                 'ot_rate_per_hour' => $otRatePerHour,
                 'advance_payment' => $advancePayment,
-                'advance_date' => $row['advance_date'] ?? null,
-                'advance_screenshot' => $advanceScreenshot,
                 'net_payment' => round((float)$payment->total_payment - $advancePayment, 2),
             ]);
         }
+    }
+
+    private function saveDriverPaymentAdvances(Request $request, VehicleDriverPayment $payment, array $advanceRows): float
+    {
+        foreach ($advanceRows as $index => $row) {
+            $advance = null;
+
+            if (!empty($row['id'])) {
+                $advance = $payment->advances()->whereKey($row['id'])->first();
+            }
+
+            if (!empty($row['remove'])) {
+                if ($advance) {
+                    if ($advance->screenshot) {
+                        Storage::disk('public')->delete($advance->screenshot);
+                    }
+
+                    $advance->delete();
+                }
+
+                continue;
+            }
+
+            $amount = round((float)($row['amount'] ?? 0), 2);
+            $uploadedScreenshot = $request->file("driver_payments.{$payment->id}.advances.$index.screenshot");
+
+            if (!$advance && $amount <= 0 && empty($row['advance_date']) && !$uploadedScreenshot) {
+                continue;
+            }
+
+            $screenshot = $advance->screenshot ?? null;
+
+            if ($uploadedScreenshot) {
+                if ($screenshot) {
+                    Storage::disk('public')->delete($screenshot);
+                }
+
+                $screenshot = $uploadedScreenshot->store('driver-advance-screenshots', 'public');
+            }
+
+            $advanceData = [
+                'advance_date' => $row['advance_date'] ?? null,
+                'amount' => $amount,
+                'screenshot' => $screenshot,
+            ];
+
+            if ($advance) {
+                $advance->update($advanceData);
+            } else {
+                $payment->advances()->create($advanceData);
+            }
+        }
+
+        return round((float)$payment->advances()->sum('amount'), 2);
     }
 
     private function calculateMinutes(?string $inTime, ?string $outTime): array
