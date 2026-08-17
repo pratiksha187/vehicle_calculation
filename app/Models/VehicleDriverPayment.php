@@ -22,8 +22,14 @@ class VehicleDriverPayment extends Model
         'ot_rate_per_hour',
         'ot_amount',
         'advance_payment',
+        'advance_date',
+        'advance_screenshot',
         'total_payment',
         'net_payment',
+    ];
+
+    protected $casts = [
+        'advance_date' => 'date',
     ];
 
     public function monthlyLog()

@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class VehicleMonthlyLogController extends Controller
 {
@@ -237,6 +238,8 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
             'driver_payments.*.monthly_payment' => 'nullable|numeric|min:0',
             'driver_payments.*.ot_rate_per_hour' => 'nullable|numeric|min:0',
             'driver_payments.*.advance_payment' => 'nullable|numeric|min:0',
+            'driver_payments.*.advance_date' => 'nullable|date',
+            'driver_payments.*.advance_screenshot' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
         ]);
 
         DB::transaction(function () use ($request, $vehicle_log) {
@@ -397,11 +400,23 @@ public function invoice(VehicleMonthlyLog $vehicle_log)
             $monthlyPayment = round((float)($row['monthly_payment'] ?? $payment->monthly_payment ?? VehicleDriverPayment::DEFAULT_FIXED_PAYMENT), 2);
             $otRatePerHour = round((float)($row['ot_rate_per_hour'] ?? $payment->ot_rate_per_hour ?? VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR), 2);
             $advancePayment = round((float)($row['advance_payment'] ?? 0), 2);
+            $advanceScreenshot = $payment->advance_screenshot;
+            $uploadedScreenshot = $request->file("driver_payments.$paymentId.advance_screenshot");
+
+            if ($uploadedScreenshot) {
+                if ($advanceScreenshot) {
+                    Storage::disk('public')->delete($advanceScreenshot);
+                }
+
+                $advanceScreenshot = $uploadedScreenshot->store('driver-advance-screenshots', 'public');
+            }
 
             $payment->update([
                 'monthly_payment' => $monthlyPayment,
                 'ot_rate_per_hour' => $otRatePerHour,
-               'advance_payment' => $advancePayment,
+                'advance_payment' => $advancePayment,
+                'advance_date' => $row['advance_date'] ?? null,
+                'advance_screenshot' => $advanceScreenshot,
                 'net_payment' => round((float)$payment->total_payment - $advancePayment, 2),
             ]);
         }

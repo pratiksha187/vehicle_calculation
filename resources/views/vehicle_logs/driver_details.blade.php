@@ -19,7 +19,7 @@
             Add driver name and Present / Absent here for driver payment only. Vehicle daily entry and company monthly billing are separate.
         </div>
 
-        <form action="{{ route('vehicle-logs.save-driver-details', $vehicle_log->id) }}" method="POST">
+        <form action="{{ route('vehicle-logs.save-driver-details', $vehicle_log->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <div class="table-responsive">
@@ -77,6 +77,8 @@
                                 <th>Present Day Payment</th>
                                 <th>Total Payment</th>
                                 <th>Advance Payment</th>
+                                <th>Advance Date</th>
+                                <th>Advance SS</th>
                                 <th>Net Payment</th>
                             </tr>
                         </thead>
@@ -94,6 +96,15 @@
                                     <td>{{ number_format($payment->total_payment, 2) }}</td>
                                     <td>
                                         <input type="number" step="0.01" min="0" name="driver_payments[{{ $payment->id }}][advance_payment]" value="{{ $payment->advance_payment }}" class="form-control form-control-sm">
+                                    </td>
+                                    <td>
+                                        <input type="date" name="driver_payments[{{ $payment->id }}][advance_date]" value="{{ optional($payment->advance_date)->format('Y-m-d') }}" class="form-control form-control-sm">
+                                    </td>
+                                    <td>
+                                        <input type="file" name="driver_payments[{{ $payment->id }}][advance_screenshot]" accept=".jpg,.jpeg,.png,.webp,.pdf,image/*,application/pdf" class="form-control form-control-sm">
+                                        @if($payment->advance_screenshot)
+                                            <a href="{{ asset('storage/' . $payment->advance_screenshot) }}" target="_blank" class="small">View SS</a>
+                                        @endif
                                     </td>
                                     <td><strong>{{ number_format($payment->net_payment, 2) }}</strong></td>
                                 </tr>
@@ -138,6 +149,8 @@
                             <th>Calculation</th>
                             <th>Total Payment</th>
                             <th>Advance</th>
+                            <th>Advance Date</th>
+                            <th>Advance SS</th>
                             <th>Net Payment</th>
                         </tr>
                     </thead>
@@ -155,6 +168,14 @@
                                 <td>{{ number_format($payment->monthly_payment, 2) }} / {{ $salaryWorkingDays }} days x {{ $attendanceSummary[$payment->driver_name]['present'] ?? 0 }} present = {{ number_format($payment->fixed_payment, 2) }} + ({{ $payment->formatted_ot }} = {{ number_format($payment->ot_hours, 2) }} hrs x {{ number_format($payment->ot_rate_per_hour, 2) }})</td>
                                 <td><strong>{{ number_format($payment->total_payment, 2) }}</strong></td>
                                 <td>{{ number_format($payment->advance_payment, 2) }}</td>
+                                <td>{{ $payment->advance_date ? $payment->advance_date->format('d/m/Y') : '-' }}</td>
+                                <td>
+                                    @if($payment->advance_screenshot)
+                                        <a href="{{ asset('storage/' . $payment->advance_screenshot) }}" target="_blank">View SS</a>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td><strong>{{ number_format($payment->net_payment, 2) }}</strong></td>
                             </tr>
                         @endforeach

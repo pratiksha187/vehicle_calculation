@@ -163,6 +163,20 @@
                         <td class="right">Rs. {{ number_format($driverPayment->advance_payment, 2) }}</td>
                     </tr>
                     <tr>
+                        <th>Advance Date</th>
+                        <td class="right">{{ $driverPayment->advance_date ? $driverPayment->advance_date->format('d-m-Y') : '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Advance SS</th>
+                        <td class="right">
+                            @if($driverPayment->advance_screenshot)
+                                <a href="{{ asset('storage/' . $driverPayment->advance_screenshot) }}" target="_blank">View SS</a>
+                            @else
+                                -
+                            @endif
+                        </td>
+                    </tr>
+                    <tr>
                         <th>Net Driver Payment</th>
                         <td class="right"><strong>Rs. {{ number_format($driverPayment->net_payment, 2) }}</strong></td>
                     </tr>
