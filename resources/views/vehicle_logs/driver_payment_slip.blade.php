@@ -7,7 +7,13 @@
         ->groupBy(fn ($entry) => $entry->driver_name ?: 'Rohit')
         ->map(fn ($entries) => [
             'present' => $entries->filter(fn ($entry) => ($entry->attendance_status ?: 'present') === 'present')->count(),
+            'half_day' => $entries->filter(fn ($entry) => $entry->attendance_status === 'half_day')->count(),
             'absent' => $entries->filter(fn ($entry) => $entry->attendance_status === 'absent')->count(),
+            'payable' => $entries->sum(fn ($entry) => match ($entry->attendance_status ?: 'present') {
+                'present' => 1,
+                'half_day' => 0.5,
+                default => 0,
+            }),
         ]);
     $salaryWorkingDays = $vehicle_log->salaryWorkingDays();
 @endphp
@@ -131,15 +137,23 @@
                         <td class="right">{{ $attendanceSummary[$driverPayment->driver_name]['present'] ?? 0 }}</td>
                     </tr>
                     <tr>
+                        <th>Half Days</th>
+                        <td class="right">{{ $attendanceSummary[$driverPayment->driver_name]['half_day'] ?? 0 }}</td>
+                    </tr>
+                    <tr>
                         <th>Absent Days</th>
                         <td class="right">{{ $attendanceSummary[$driverPayment->driver_name]['absent'] ?? 0 }}</td>
+                    </tr>
+                    <tr>
+                        <th>Payable Days</th>
+                        <td class="right">{{ number_format($attendanceSummary[$driverPayment->driver_name]['payable'] ?? 0, 1) }}</td>
                     </tr>
                     <tr>
                         <th>Monthly Payment</th>
                         <td class="right">Rs. {{ number_format($driverPayment->monthly_payment, 2) }}</td>
                     </tr>
                     <tr>
-                        <th>Present Day Payment</th>
+                        <th>Payable Day Payment</th>
                         <td class="right">Rs. {{ number_format($driverPayment->fixed_payment, 2) }}</td>
                     </tr>
                     <tr>

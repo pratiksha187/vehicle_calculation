@@ -45,7 +45,7 @@
                             <td>{{ $entry->entry_date->format('d/m/Y') }}</td>
                             <td>{{ $entry->day }}</td>
                             <td>{{ $entry->driver_name }}</td>
-                            <td>{{ ucfirst($entry->attendance_status ?: 'present') }}</td>
+                            <td>{{ str($entry->attendance_status ?: 'present')->replace('_', ' ')->title() }}</td>
                             <td>{{ $entry->challan_no }}</td>
                             <td>{{ $entry->diesel_added }}</td>
                             <td>{{ $entry->start_reading }}</td>

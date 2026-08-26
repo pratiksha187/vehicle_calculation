@@ -16,7 +16,7 @@
         </div>
 
         <div class="alert alert-info py-2">
-            Add driver name and Present / Absent here for driver payment only. Vehicle daily entry and company monthly billing are separate.
+            Add driver name and Present / Absent / Half Day here for driver payment only. Vehicle daily entry and company monthly billing are separate.
         </div>
 
         <form action="{{ route('vehicle-logs.save-driver-details', $vehicle_log->id) }}" method="POST" enctype="multipart/form-data">
@@ -30,7 +30,7 @@
                             <th>Date</th>
                             <th>Day</th>
                             <th>Driver Name</th>
-                            <th>Present / Absent</th>
+                            <th>Attendance</th>
                             <th>Remark</th>
                         </tr>
                     </thead>
@@ -50,6 +50,7 @@
                                     <select name="entries[{{ $index }}][attendance_status]" class="form-select form-select-sm">
                                         <option value="present" @selected(($entry->attendance_status ?: 'present') === 'present')>Present</option>
                                         <option value="absent" @selected($entry->attendance_status === 'absent')>Absent</option>
+                                        <option value="half_day" @selected($entry->attendance_status === 'half_day')>Half Day</option>
                                     </select>
                                 </td>
                                 <td>
@@ -74,7 +75,7 @@
                                 <th>Driver</th>
                                 <th>Monthly Payment</th>
                                 <th>Extra Hrs Rate</th>
-                                <th>Present Day Payment</th>
+                                <th>Payable Day Payment</th>
                                 <th>Total Payment</th>
                                 <th>Advance Total</th>
                                 <th>Net Payment</th>
@@ -168,13 +169,19 @@
                     ->groupBy(fn ($entry) => $entry->driver_name ?: 'Rohit')
                     ->map(fn ($entries) => [
                         'present' => $entries->filter(fn ($entry) => ($entry->attendance_status ?: 'present') === 'present')->count(),
+                        'half_day' => $entries->filter(fn ($entry) => $entry->attendance_status === 'half_day')->count(),
                         'absent' => $entries->filter(fn ($entry) => $entry->attendance_status === 'absent')->count(),
+                        'payable' => $entries->sum(fn ($entry) => match ($entry->attendance_status ?: 'present') {
+                            'present' => 1,
+                            'half_day' => 0.5,
+                            default => 0,
+                        }),
                     ]);
                 $salaryWorkingDays = $vehicle_log->salaryWorkingDays();
             @endphp
 
             <div class="alert alert-secondary py-2 mt-4">
-                Salary days: {{ $salaryWorkingDays }}. Sundays are included; mark Sunday Absent to cut that day's payment.
+                Salary days: {{ $salaryWorkingDays }}. Sundays are included; mark Sunday Absent to cut that day's payment, or Half Day for 50% day payment.
             </div>
 
             <div class="table-responsive mt-4">
@@ -183,9 +190,11 @@
                         <tr>
                             <th>Driver</th>
                             <th>Present Days</th>
+                            <th>Half Days</th>
                             <th>Absent Days</th>
+                            <th>Payable Days</th>
                             <th>Monthly Payment</th>
-                            <th>Present Day Payment</th>
+                            <th>Payable Day Payment</th>
                             <th>OT Hrs</th>
                             <th>Driver OT Rate</th>
                             <th>OT Amount</th>
@@ -200,13 +209,15 @@
                             <tr>
                                 <td>{{ $payment->driver_name }}</td>
                                 <td>{{ $attendanceSummary[$payment->driver_name]['present'] ?? 0 }}</td>
+                                <td>{{ $attendanceSummary[$payment->driver_name]['half_day'] ?? 0 }}</td>
                                 <td>{{ $attendanceSummary[$payment->driver_name]['absent'] ?? 0 }}</td>
+                                <td>{{ number_format($attendanceSummary[$payment->driver_name]['payable'] ?? 0, 1) }}</td>
                                 <td>{{ number_format($payment->monthly_payment, 2) }}</td>
                                 <td>{{ number_format($payment->fixed_payment, 2) }}</td>
                                 <td>{{ $payment->formatted_ot }}</td>
                                 <td>{{ number_format($payment->ot_rate_per_hour, 2) }}</td>
                                 <td>{{ number_format($payment->ot_amount, 2) }}</td>
-                                <td>{{ number_format($payment->monthly_payment, 2) }} / {{ $salaryWorkingDays }} days x {{ $attendanceSummary[$payment->driver_name]['present'] ?? 0 }} present = {{ number_format($payment->fixed_payment, 2) }} + ({{ $payment->formatted_ot }} = {{ number_format($payment->ot_hours, 2) }} hrs x {{ number_format($payment->ot_rate_per_hour, 2) }})</td>
+                                <td>{{ number_format($payment->monthly_payment, 2) }} / {{ $salaryWorkingDays }} days x {{ number_format($attendanceSummary[$payment->driver_name]['payable'] ?? 0, 1) }} payable = {{ number_format($payment->fixed_payment, 2) }} + ({{ $payment->formatted_ot }} = {{ number_format($payment->ot_hours, 2) }} hrs x {{ number_format($payment->ot_rate_per_hour, 2) }})</td>
                                 <td><strong>{{ number_format($payment->total_payment, 2) }}</strong></td>
                                 <td>
                                     <strong>{{ number_format($payment->advance_payment, 2) }}</strong>

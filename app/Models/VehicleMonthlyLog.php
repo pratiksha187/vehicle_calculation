@@ -91,8 +91,10 @@ class VehicleMonthlyLog extends Model
             ->reorder()
             ->selectRaw("COALESCE(NULLIF(driver_name, ''), 'Rohit') as driver_name")
             ->selectRaw("SUM(CASE WHEN attendance_status IS NULL OR attendance_status = 'present' THEN 1 ELSE 0 END) as present_days")
+            ->selectRaw("SUM(CASE WHEN attendance_status = 'half_day' THEN 1 ELSE 0 END) as half_days")
             ->selectRaw("SUM(CASE WHEN attendance_status = 'absent' THEN 1 ELSE 0 END) as absent_days")
-            ->selectRaw("SUM(CASE WHEN attendance_status IS NULL OR attendance_status = 'present' THEN ot_minutes ELSE 0 END) as ot_minutes")
+            ->selectRaw("SUM(CASE WHEN attendance_status IS NULL OR attendance_status IN ('present', 'half_day') THEN ot_minutes ELSE 0 END) as ot_minutes")
+            ->selectRaw("SUM(CASE WHEN attendance_status IS NULL OR attendance_status = 'present' THEN 1 WHEN attendance_status = 'half_day' THEN 0.5 ELSE 0 END) as payable_days")
             ->groupBy('driver_name')
             ->get();
 
@@ -100,8 +102,10 @@ class VehicleMonthlyLog extends Model
             $driverTotals = collect([(object)[
                 'driver_name' => 'Rohit',
                 'present_days' => $salaryWorkingDays,
+                'half_days' => 0,
                 'absent_days' => 0,
                 'ot_minutes' => (int)$this->total_ot_minutes,
+                'payable_days' => $salaryWorkingDays,
             ]]);
         }
 
@@ -113,14 +117,14 @@ class VehicleMonthlyLog extends Model
             $existingPayment = $this->driverPayments()
                 ->where('driver_name', $driverName)
                 ->first();
-            $presentDays = (int)$driverTotal->present_days;
+            $payableDays = (float)$driverTotal->payable_days;
             $otMinutes = (int)$driverTotal->ot_minutes;
             $otHours = $otMinutes / 60;
             $otRate = (float)($existingPayment->ot_rate_per_hour ?? VehicleDriverPayment::DEFAULT_OT_RATE_PER_HOUR);
             $otAmount = $otHours * $otRate;
             $monthlyPayment = (float)($existingPayment->monthly_payment ?? VehicleDriverPayment::DEFAULT_FIXED_PAYMENT);
             $perDayPayment = $monthlyPayment / $salaryWorkingDays;
-            $payableFixedPayment = $perDayPayment * $presentDays;
+            $payableFixedPayment = $perDayPayment * $payableDays;
             $roundedFixedPayment = round($payableFixedPayment, 2);
             $roundedOtAmount = round($otAmount, 2);
             $advancePayment = $existingPayment
