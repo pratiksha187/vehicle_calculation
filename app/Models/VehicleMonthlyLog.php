@@ -94,7 +94,7 @@ class VehicleMonthlyLog extends Model
             ->selectRaw("SUM(CASE WHEN attendance_status = 'half_day' THEN 1 ELSE 0 END) as half_days")
             ->selectRaw("SUM(CASE WHEN attendance_status = 'absent' THEN 1 ELSE 0 END) as absent_days")
             ->selectRaw("SUM(CASE WHEN attendance_status IS NULL OR attendance_status IN ('present', 'half_day') THEN ot_minutes ELSE 0 END) as ot_minutes")
-            ->selectRaw("SUM(CASE WHEN attendance_status IS NULL OR attendance_status = 'present' THEN 1 WHEN attendance_status = 'half_day' THEN 0.5 ELSE 0 END) as payable_days")
+            ->selectRaw("SUM(CASE WHEN day = 'Sun' THEN 1 WHEN attendance_status IS NULL OR attendance_status = 'present' THEN 1 WHEN attendance_status = 'half_day' THEN 0.5 ELSE 0 END) as payable_days")
             ->groupBy('driver_name')
             ->get();
 

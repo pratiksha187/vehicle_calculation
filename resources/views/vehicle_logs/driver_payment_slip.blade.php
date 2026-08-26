@@ -9,11 +9,13 @@
             'present' => $entries->filter(fn ($entry) => ($entry->attendance_status ?: 'present') === 'present')->count(),
             'half_day' => $entries->filter(fn ($entry) => $entry->attendance_status === 'half_day')->count(),
             'absent' => $entries->filter(fn ($entry) => $entry->attendance_status === 'absent')->count(),
-            'payable' => $entries->sum(fn ($entry) => match ($entry->attendance_status ?: 'present') {
-                'present' => 1,
-                'half_day' => 0.5,
-                default => 0,
-            }),
+            'payable' => $entries->sum(fn ($entry) => $entry->entry_date->isSunday()
+                ? 1
+                : match ($entry->attendance_status ?: 'present') {
+                    'present' => 1,
+                    'half_day' => 0.5,
+                    default => 0,
+                }),
         ]);
     $salaryWorkingDays = $vehicle_log->salaryWorkingDays();
 @endphp

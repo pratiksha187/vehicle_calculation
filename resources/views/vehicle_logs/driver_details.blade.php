@@ -171,17 +171,19 @@
                         'present' => $entries->filter(fn ($entry) => ($entry->attendance_status ?: 'present') === 'present')->count(),
                         'half_day' => $entries->filter(fn ($entry) => $entry->attendance_status === 'half_day')->count(),
                         'absent' => $entries->filter(fn ($entry) => $entry->attendance_status === 'absent')->count(),
-                        'payable' => $entries->sum(fn ($entry) => match ($entry->attendance_status ?: 'present') {
-                            'present' => 1,
-                            'half_day' => 0.5,
-                            default => 0,
-                        }),
+                        'payable' => $entries->sum(fn ($entry) => $entry->entry_date->isSunday()
+                            ? 1
+                            : match ($entry->attendance_status ?: 'present') {
+                                'present' => 1,
+                                'half_day' => 0.5,
+                                default => 0,
+                            }),
                     ]);
                 $salaryWorkingDays = $vehicle_log->salaryWorkingDays();
             @endphp
 
             <div class="alert alert-secondary py-2 mt-4">
-                Salary days: {{ $salaryWorkingDays }}. Sundays are included; mark Sunday Absent to cut that day's payment, or Half Day for 50% day payment.
+                Salary days: {{ $salaryWorkingDays }}. Sundays are always paid; weekday Absent cuts that day's payment, and weekday Half Day gives 50% day payment.
             </div>
 
             <div class="table-responsive mt-4">
