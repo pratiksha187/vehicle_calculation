@@ -159,18 +159,6 @@
                         <td class="right">Rs. {{ number_format($driverPayment->fixed_payment, 2) }}</td>
                     </tr>
                     <tr>
-                        <th>Total Working OT After 12 Hours</th>
-                        <td class="right">{{ $driverPayment->formatted_ot }}</td>
-                    </tr>
-                    <tr>
-                        <th>Driver OT Rate</th>
-                        <td class="right">Rs. {{ number_format($driverPayment->ot_rate_per_hour, 2) }} / hour</td>
-                    </tr>
-                    <tr>
-                        <th>Driver OT Amount</th>
-                        <td class="right">Rs. {{ number_format($driverPayment->ot_amount, 2) }}</td>
-                    </tr>
-                    <tr>
                         <th>Total Driver Payment Before Advance</th>
                         <td class="right"><strong>Rs. {{ number_format($driverPayment->total_payment, 2) }}</strong></td>
                     </tr>
